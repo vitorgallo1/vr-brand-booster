@@ -136,7 +136,7 @@ function Hero() {
                 <p className="text-[10px] font-medium uppercase tracking-[0.22em] text-primary">
                   Destaque
                 </p>
-                <p className="mt-1 font-display text-lg font-semibold">Linha Sport 2026</p>
+                <p className="mt-1 font-display text-lg font-semibold">Yamaha MT-03 2026</p>
               </div>
               <span className="rounded-full border border-primary/40 bg-background/70 px-3 py-1 text-xs font-medium text-primary">
                 Novo
@@ -186,30 +186,30 @@ type Bike = {
 const BIKES: Bike[] = [
   {
     tag: "Naked",
-    name: "VR Street 300",
-    desc: "Urbana ágil, torque generoso e design agressivo. Feita pra dominar o trânsito com estilo.",
-    specs: ["292cc • 27 cv", "ABS duplo", "Painel digital"],
-    price: "a partir de R$ 189/mês",
+    name: "Honda CG 160 Titan",
+    desc: "A moto mais vendida do Brasil. Econômica, confiável e feita pra encarar o dia a dia sem susto.",
+    specs: ["162cc • 14,9 cv", "Freio CBS", "Painel digital"],
+    price: "a partir de R$ 289/mês",
     img: bikeNaked,
-    wa: "https://wa.me/5549999999999?text=Ol%C3%A1!%20Quero%20uma%20simula%C3%A7%C3%A3o%20da%20VR%20Street%20300.",
+    wa: "https://wa.me/5549999999999?text=Ol%C3%A1!%20Quero%20uma%20simula%C3%A7%C3%A3o%20da%20Honda%20CG%20160%20Titan.",
   },
   {
     tag: "Adventure",
-    name: "VR Trail 450",
-    desc: "Para quem encara asfalto, terra e a estrada que ninguém foi. Robusta, alta e confortável.",
-    specs: ["449cc • 40 cv", "Suspensão longa", "Tanque 17L"],
-    price: "a partir de R$ 249/mês",
+    name: "Honda XRE 300",
+    desc: "Trail robusta pra asfalto e terra. Altura de pilotagem, tanque generoso e a fama de indestrutível.",
+    specs: ["291cc • 25,4 cv", "ABS de série", "Tanque 13,8L"],
+    price: "a partir de R$ 429/mês",
     img: bikeTrail,
-    wa: "https://wa.me/5549999999999?text=Ol%C3%A1!%20Quero%20uma%20simula%C3%A7%C3%A3o%20da%20VR%20Trail%20450.",
+    wa: "https://wa.me/5549999999999?text=Ol%C3%A1!%20Quero%20uma%20simula%C3%A7%C3%A3o%20da%20Honda%20XRE%20300.",
   },
   {
-    tag: "Urbana",
-    name: "VR Move 150",
-    desc: "Scooter automática, econômica e prática. Perfeita pra rotina, entregas e o vai-e-vem da cidade.",
-    specs: ["149cc • CVT", "Baixo consumo", "Porta-capacete"],
-    price: "a partir de R$ 139/mês",
+    tag: "Scooter",
+    name: "Honda PCX 160",
+    desc: "Automática, silenciosa e econômica. O jeito mais confortável de se mover pela cidade.",
+    specs: ["156cc • CVT", "Freio ABS dianteiro", "Porta-objetos 28L"],
+    price: "a partir de R$ 349/mês",
     img: bikeScooter,
-    wa: "https://wa.me/5549999999999?text=Ol%C3%A1!%20Quero%20uma%20simula%C3%A7%C3%A3o%20da%20VR%20Move%20150.",
+    wa: "https://wa.me/5549999999999?text=Ol%C3%A1!%20Quero%20uma%20simula%C3%A7%C3%A3o%20da%20Honda%20PCX%20160.",
   },
 ];
 
