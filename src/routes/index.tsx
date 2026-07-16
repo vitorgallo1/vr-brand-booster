@@ -152,7 +152,7 @@ function Hero() {
 function Stats() {
   const items = [
     { k: "+193", v: "Lojas Grupo VR", d: "Presente em 12 estados do Brasil" },
-    { k: "R$ 100M+", v: "Faturamento anual", d: "Solidez de quem entrega há anos" },
+    { k: "+15 anos", v: "De mercado", d: "Tradição e credibilidade no setor" },
     { k: "9,7/10", v: "Satisfação", d: "Avaliação dos nossos clientes" },
     { k: "24h", v: "Aprovação de crédito", d: "Financiamento sem burocracia" },
   ];
