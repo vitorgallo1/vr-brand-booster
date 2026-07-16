@@ -32,16 +32,14 @@ function Index() {
 
 function Logo() {
   return (
-    <a href="#top" className="flex items-center gap-2.5" aria-label="VR Multimarcas">
-      <span className="grid h-9 w-9 place-items-center rounded-md bg-gradient-gold font-display text-sm font-bold text-primary-foreground">
-        VR
-      </span>
-      <span className="flex flex-col leading-none">
-        <span className="font-display text-[15px] font-semibold tracking-wide">VR</span>
-        <span className="text-[10px] uppercase tracking-[0.22em] text-muted-foreground">
-          Multimarcas
-        </span>
-      </span>
+    <a href="#top" className="flex items-center" aria-label="VR Multimarcas">
+      <img
+        src={logoVR.url}
+        alt="VR Multimarcas"
+        width={200}
+        height={64}
+        className="h-10 w-auto md:h-11"
+      />
     </a>
   );
 }
