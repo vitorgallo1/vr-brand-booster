@@ -4,6 +4,7 @@ import bikeNaked from "@/assets/bike-naked.jpg";
 import bikeTrail from "@/assets/bike-trail.jpg";
 import bikeScooter from "@/assets/bike-scooter.jpg";
 import showroom from "@/assets/showroom.jpg";
+import logoVR from "@/assets/logo-vr.jpg.asset.json";
 
 export const Route = createFileRoute("/")({
   component: Index,
