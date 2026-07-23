@@ -5,9 +5,11 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * VR Multimarcas — premium motorcycle dealership sales page.
- * Identity: deep charcoal black + warm champagne gold accent.
- * Type: Sora (display) + Manrope (text). Loaded via <link> in __root.tsx.
+ * VR Multimarcas — página de vendas / catálogo.
+ * Identidade: paleta oficial do Grupo VR (grupo-vr.com) — preto puro + dourado.
+ * Tokens copiados do site institucional: background 0 0% 0%, gold 43 74% 52%.
+ * Regra: dourado é reservado para CTA, preço e destaque. Nunca para texto corrido.
+ * Type: Sora (display) + Manrope (texto). Carregadas via <link> em __root.tsx.
  */
 
 @theme inline {
@@ -28,7 +30,7 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-primary: var(--primary);
   --color-primary-foreground: var(--primary-foreground);
-  --color-primary-glow: var(--primary-glow);
+  --color-primary-dark: var(--primary-dark);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
   --color-muted: var(--muted);
@@ -42,53 +44,63 @@
   --color-ring: var(--ring);
   --color-surface: var(--surface);
   --color-surface-elevated: var(--surface-elevated);
+  --color-ink: var(--ink);
 
-  --shadow-glow: 0 20px 60px -20px color-mix(in oklab, var(--primary) 45%, transparent);
-  --shadow-elegant: 0 30px 80px -30px oklch(0 0 0 / 0.6);
+  /* No preto, sombra não aparece — a "elevação" vem da borda e do brilho dourado */
+  --shadow-card: 0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 20px 40px -24px hsl(0 0% 0% / 0.9);
+  --shadow-card-hover: 0 0 0 1px hsl(43 74% 52% / 0.35), 0 30px 60px -30px hsl(43 74% 52% / 0.35);
+  --shadow-cta: 0 10px 30px -10px hsl(43 74% 52% / 0.55);
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 1rem;
 
-  /* Deep warm black — not pure #000, has a faint warm cast so gold sits richer */
-  --background: oklch(0.14 0.008 65);
-  --foreground: oklch(0.96 0.008 80);
+  /* Preto puro — mesmo do site institucional do Grupo VR */
+  --background: hsl(0 0% 0%);
+  --foreground: hsl(0 0% 100%);
 
-  --surface: oklch(0.17 0.01 65);
-  --surface-elevated: oklch(0.21 0.012 65);
+  /* Usado onde o texto precisa de peso máximo (preços, títulos) */
+  --ink: hsl(0 0% 100%);
 
-  --card: oklch(0.18 0.01 65);
-  --card-foreground: oklch(0.96 0.008 80);
+  --surface: hsl(0 0% 5%);
+  --surface-elevated: hsl(0 0% 10%);
 
-  --popover: oklch(0.18 0.01 65);
-  --popover-foreground: oklch(0.96 0.008 80);
+  --card: hsl(0 0% 5%);
+  --card-foreground: hsl(0 0% 100%);
 
-  /* Champagne gold — richer than yellow, closer to Grupo VR identity */
-  --primary: oklch(0.82 0.13 82);
-  --primary-foreground: oklch(0.15 0.01 65);
-  --primary-glow: oklch(0.9 0.14 88);
+  --popover: hsl(0 0% 3%);
+  --popover-foreground: hsl(0 0% 100%);
 
-  --secondary: oklch(0.24 0.012 65);
-  --secondary-foreground: oklch(0.95 0.008 80);
+  /* Dourado oficial Grupo VR */
+  --primary: hsl(43 74% 52%);
+  --primary-foreground: hsl(0 0% 0%);
+  --primary-dark: hsl(43 74% 42%);
 
-  --muted: oklch(0.22 0.01 65);
-  --muted-foreground: oklch(0.68 0.02 75);
+  --secondary: hsl(0 0% 10%);
+  --secondary-foreground: hsl(0 0% 100%);
 
-  --accent: oklch(0.82 0.13 82);
-  --accent-foreground: oklch(0.15 0.01 65);
+  --muted: hsl(0 0% 15%);
+  --muted-foreground: hsl(0 0% 65%);
 
-  --destructive: oklch(0.6 0.22 27);
-  --destructive-foreground: oklch(0.98 0 0);
+  --accent: hsl(43 74% 52%);
+  --accent-foreground: hsl(0 0% 0%);
 
-  --border: oklch(0.28 0.012 70 / 0.6);
-  --input: oklch(0.28 0.012 70);
-  --ring: oklch(0.82 0.13 82);
+  --destructive: hsl(0 84.2% 60.2%);
+  --destructive-foreground: hsl(0 0% 100%);
 
-  --gradient-gold: linear-gradient(135deg, oklch(0.86 0.14 85), oklch(0.72 0.13 70));
-  --gradient-hero: radial-gradient(ellipse at 70% 30%, oklch(0.35 0.08 75 / 0.5), transparent 60%),
-                   radial-gradient(ellipse at 20% 80%, oklch(0.25 0.05 60 / 0.4), transparent 55%),
-                   linear-gradient(180deg, oklch(0.12 0.008 65), oklch(0.16 0.01 65));
-  --gradient-fade: linear-gradient(180deg, transparent, oklch(0.14 0.008 65));
+  --border: hsl(0 0% 15%);
+  --input: hsl(0 0% 15%);
+  --ring: hsl(43 74% 52%);
+
+  --gradient-brand: linear-gradient(135deg, hsl(45 80% 62%), hsl(43 74% 45%));
+  /* Overlay do hero: escurece a foto o bastante para o texto branco ficar legível */
+  --gradient-hero: linear-gradient(
+      100deg,
+      hsl(0 0% 0% / 0.95) 0%,
+      hsl(0 0% 0% / 0.8) 45%,
+      hsl(0 0% 0% / 0.35) 100%
+    );
+  --gradient-fade: linear-gradient(180deg, transparent, hsl(0 0% 0%));
 }
 
 @layer base {
@@ -115,22 +127,24 @@
   }
 }
 
-@utility bg-gradient-gold {
-  background-image: var(--gradient-gold);
+@utility bg-gradient-brand {
+  background-image: var(--gradient-brand);
 }
-@utility bg-gradient-hero {
-  background-image: var(--gradient-hero);
-}
-@utility text-gradient-gold {
-  background-image: var(--gradient-gold);
+@utility text-gradient-brand {
+  background-image: var(--gradient-brand);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
-@utility border-hairline {
-  border: 1px solid oklch(from var(--primary) l c h / 0.25);
+@utility bg-gradient-hero {
+  background-image: var(--gradient-hero);
 }
-@utility ring-gold {
-  box-shadow: 0 0 0 1px oklch(from var(--primary) l c h / 0.3),
-              0 30px 80px -40px oklch(from var(--primary) l c h / 0.4);
+@utility shadow-card {
+  box-shadow: var(--shadow-card);
+}
+@utility shadow-card-hover {
+  box-shadow: var(--shadow-card-hover);
+}
+@utility shadow-cta {
+  box-shadow: var(--shadow-cta);
 }
