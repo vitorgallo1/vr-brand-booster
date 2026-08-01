@@ -11,7 +11,8 @@ import bancoSicredi from "@/assets/bancos/sicredi.svg";
 import bancoCaixa from "@/assets/bancos/caixa.svg";
 
 // Todas as fotos das motos vêm da sequência de giro 360° do fabricante
-// (recortes com fundo transparente) — garante fundo 100% branco em toda a vitrine.
+// (recortes com fundo transparente) — o fundo de estúdio (STUDIO_BG) é aplicado por
+// trás delas para dar um visual consistente em toda a vitrine.
 const globFrames = (pattern: string) =>
   Object.entries(
     import.meta.glob("/src/assets/motos/360/**/*.webp", {
@@ -338,14 +339,51 @@ const BIKES: Bike[] = [
   },
 ];
 
+// Quanto maior o divisor, mais arrasto é necessário por quadro — giro mais lento e
+// controlado (comparado ao valor original de 6, que virava a moto inteira num gesto rápido).
+const DRAG_PX_PER_FRAME = 36;
+
+// Fundo escuro de estúdio usado atrás dos recortes com fundo transparente — mesmo
+// tratamento do card e do lightbox, para a moto parecer fotografada no mesmo ambiente.
+const STUDIO_BG =
+  "bg-[radial-gradient(ellipse_at_50%_30%,_rgba(255,255,255,0.08),_rgba(10,10,10,0.96)_70%)]";
+const THUMB_BG = "bg-neutral-900";
+
+function AngleIndicator({
+  angle,
+  position,
+}: {
+  angle: number;
+  position: "top-left" | "bottom-left";
+}) {
+  const rad = (angle * Math.PI) / 180;
+  const x2 = 14 + 10 * Math.sin(rad);
+  const y2 = 14 - 10 * Math.cos(rad);
+  const positionClass = position === "top-left" ? "left-3 top-3" : "bottom-3 left-3";
+  return (
+    <div
+      className={`pointer-events-none absolute ${positionClass} flex items-center gap-2 rounded-full bg-background/85 px-2.5 py-2 shadow backdrop-blur`}
+    >
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden>
+        <circle cx="14" cy="14" r="12" fill="none" className="stroke-border" strokeWidth="1.5" />
+        <line x1="14" y1="14" x2={x2} y2={y2} className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="14" cy="14" r="1.5" className="fill-primary" />
+      </svg>
+      <span className="text-[11px] font-semibold tabular-nums text-ink">{Math.round(angle)}°</span>
+    </div>
+  );
+}
+
 function Spin360Viewer({
   frames,
   alt,
   onTap,
+  anglePosition = "bottom-left",
 }: {
   frames: string[];
   alt: string;
   onTap?: () => void;
+  anglePosition?: "top-left" | "bottom-left";
 }) {
   const [index, setIndex] = useState(0);
   const [hint, setHint] = useState(true);
@@ -362,7 +400,7 @@ function Spin360Viewer({
     if (Math.abs(dx) > 4) drag.current.moved = true;
     if (!drag.current.moved) return;
     setHint(false);
-    const framesPerDrag = Math.round(dx / 6);
+    const framesPerDrag = Math.round(dx / DRAG_PX_PER_FRAME);
     let next = (drag.current.startIndex - framesPerDrag) % frames.length;
     if (next < 0) next += frames.length;
     setIndex(next);
@@ -372,6 +410,8 @@ function Spin360Viewer({
     if (drag.current && !drag.current.moved) onTap?.();
     drag.current = null;
   };
+
+  const angle = (index / frames.length) * 360;
 
   return (
     <div
@@ -390,6 +430,7 @@ function Spin360Viewer({
         draggable={false}
         className="h-full w-full object-contain pointer-events-none"
       />
+      <AngleIndicator angle={angle} position={anglePosition} />
       {hint && (
         <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-4">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-background/85 px-3 py-1.5 text-[11px] font-semibold text-ink shadow backdrop-blur">
@@ -574,92 +615,128 @@ function Lightbox({
         aria-modal="true"
         aria-label={`${bike.name} — fotos e detalhes`}
         tabIndex={-1}
-        className={`grid h-full max-h-[75vh] w-full max-w-6xl grid-rows-[1fr_auto] overflow-hidden rounded-2xl bg-card shadow-2xl outline-none transition-all duration-300 lg:grid-cols-[1fr_380px] lg:grid-rows-1 ${
+        className={`grid h-full max-h-[88vh] w-full max-w-6xl grid-rows-[1fr_auto] overflow-hidden rounded-2xl bg-card shadow-2xl outline-none transition-all duration-300 lg:grid-cols-[1fr_380px] lg:grid-rows-1 ${
           visible ? "scale-100 opacity-100" : "scale-95 opacity-0"
         }`}
       >
-        <div className="relative flex h-full items-center justify-center overflow-hidden bg-white p-4 sm:p-6">
-          <div className="relative aspect-[3/2] max-h-full w-full">
-            {lbMode === "360" && bike.spin360 ? (
-              <Spin360Viewer frames={bike.spin360} alt={bike.name} />
-            ) : (
-              <div
-                onPointerDown={onImgPointerDown}
-                onPointerMove={onImgPointerMove}
-                onPointerUp={onImgPointerUp}
-                onPointerLeave={onImgPointerUp}
-                onPointerCancel={onImgPointerUp}
-                className={`h-full w-full touch-none select-none overflow-hidden ${
-                  zoomed ? "cursor-grab active:cursor-grabbing" : "cursor-zoom-in"
-                }`}
-              >
-                <img
-                  src={bike.imgs[lbIndex]}
-                  alt={`${bike.name} — foto ${lbIndex + 1}`}
-                  draggable={false}
-                  className={`h-full w-full object-contain ${zoomed ? "" : "transition-transform duration-300"}`}
-                  style={{
-                    transform: zoomed
-                      ? `scale(${ZOOM}) translate(${pan.x}px, ${pan.y}px)`
-                      : "scale(1)",
-                  }}
-                />
-              </div>
-            )}
-            {lbMode === "gallery" && bike.imgs.length > 1 && (
-              <>
-                <button
-                  type="button"
-                  onClick={() => goTo(-1)}
-                  aria-label="Foto anterior"
-                  className="absolute left-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/70 text-lg text-white shadow transition hover:bg-black"
-                >
-                  ‹
-                </button>
-                <button
-                  type="button"
-                  onClick={() => goTo(1)}
-                  aria-label="Próxima foto"
-                  className="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full bg-black/70 text-lg text-white shadow transition hover:bg-black"
-                >
-                  ›
-                </button>
-              </>
-            )}
+        <div className={`relative flex h-full flex-col overflow-hidden p-4 sm:p-6 ${STUDIO_BG}`}>
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/40 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
+            >
+              <span aria-hidden>←</span> Voltar às motos
+            </button>
             <button
               type="button"
               onClick={onClose}
               aria-label="Fechar"
-              className="absolute right-2 top-2 grid h-9 w-9 place-items-center rounded-full bg-black/80 text-white shadow transition hover:bg-black"
+              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur transition hover:bg-white/10"
             >
               ✕
             </button>
-            {has360 && (
-              <button
-                type="button"
-                onClick={() => {
-                  setZoomed(false);
-                  setLbMode(lbMode === "360" ? "gallery" : "360");
-                }}
-                className={`absolute left-2 top-2 inline-flex items-center gap-2 rounded-full px-4 py-2.5 text-sm font-bold shadow-lg transition ${
-                  lbMode === "360"
-                    ? "bg-black/85 text-white hover:bg-black"
-                    : "animate-pulse bg-primary text-primary-foreground ring-4 ring-primary/30 hover:animate-none hover:bg-primary-dark hover:ring-primary/50"
-                }`}
-              >
-                {lbMode === "360" ? (
-                  <>
-                    <span aria-hidden>✕</span> Ver fotos
-                  </>
-                ) : (
-                  <>
-                    <span aria-hidden className="text-lg leading-none">⟳</span> Ver em 360°
-                  </>
-                )}
-              </button>
-            )}
-            {lbMode === "gallery" && (
-              <div className="absolute inset-x-0 bottom-2 flex justify-center gap-1.5">
+          </div>
+
+          <div className="relative min-h-0 flex-1 py-2">
+            <div className="relative mx-auto aspect-[3/2] h-full max-w-full">
+              {lbMode === "360" && bike.spin360 ? (
+                <Spin360Viewer frames={bike.spin360} alt={bike.name} anglePosition="top-left" />
+              ) : (
+                <div
+                  onPointerDown={onImgPointerDown}
+                  onPointerMove={onImgPointerMove}
+                  onPointerUp={onImgPointerUp}
+                  onPointerLeave={onImgPointerUp}
+                  onPointerCancel={onImgPointerUp}
+                  className={`h-full w-full touch-none select-none overflow-hidden ${
+                    zoomed ? "cursor-grab active:cursor-grabbing" : "cursor-zoom-in"
+                  }`}
+                >
+                  <img
+                    src={bike.imgs[lbIndex]}
+                    alt={`${bike.name} — foto ${lbIndex + 1}`}
+                    draggable={false}
+                    className={`h-full w-full object-contain ${zoomed ? "" : "transition-transform duration-300"}`}
+                    style={{
+                      transform: zoomed
+                        ? `scale(${ZOOM}) translate(${pan.x}px, ${pan.y}px)`
+                        : "scale(1)",
+                    }}
+                  />
+                </div>
+              )}
+              {lbMode === "gallery" && bike.imgs.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => goTo(-1)}
+                    aria-label="Foto anterior"
+                    className="absolute left-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/30 bg-black/30 text-lg text-white backdrop-blur transition hover:bg-black/60"
+                  >
+                    ‹
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => goTo(1)}
+                    aria-label="Próxima foto"
+                    className="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/30 bg-black/30 text-lg text-white backdrop-blur transition hover:bg-black/60"
+                  >
+                    ›
+                  </button>
+                </>
+              )}
+              {has360 && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setZoomed(false);
+                    setLbMode(lbMode === "360" ? "gallery" : "360");
+                  }}
+                  className={`absolute bottom-2 left-2 flex h-20 w-20 flex-col items-center justify-center gap-0.5 rounded-full border-2 backdrop-blur transition ${
+                    lbMode === "360"
+                      ? "border-white/30 bg-black/50 text-white hover:bg-black/70"
+                      : "border-primary/70 bg-black/50 text-primary hover:bg-black/70"
+                  }`}
+                >
+                  {lbMode === "360" ? (
+                    <>
+                      <span aria-hidden className="text-xl leading-none">✕</span>
+                      <span className="text-[10px] font-semibold">Ver fotos</span>
+                    </>
+                  ) : (
+                    <>
+                      <span aria-hidden className="text-xl leading-none">⟳</span>
+                      <span className="text-[11px] font-bold leading-none">360°</span>
+                      <span className="text-[9px] font-medium">Ver em 360</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+
+          {lbMode === "gallery" && (
+            <div className="flex shrink-0 flex-col items-center gap-3 pt-2">
+              {bike.imgs.length > 1 && (
+                <div className="flex justify-center gap-1.5">
+                  {bike.imgs.map((im, i) => (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => {
+                        setLbIndex(i);
+                        setZoomed(false);
+                      }}
+                      aria-label={`Ver foto ${i + 1}`}
+                      className={`h-1 rounded-full transition ${
+                        lbIndex === i ? "w-6 bg-primary" : "w-3 bg-white/25 hover:bg-white/40"
+                      }`}
+                    />
+                  ))}
+                </div>
+              )}
+              <div className="flex w-full justify-center gap-2 overflow-x-auto">
                 {bike.imgs.map((im, i) => (
                   <button
                     key={i}
@@ -669,14 +746,19 @@ function Lightbox({
                       setZoomed(false);
                     }}
                     aria-label={`Ver foto ${i + 1}`}
-                    className={`h-2 w-2 rounded-full transition ${
-                      lbIndex === i ? "bg-primary" : "bg-black/20 hover:bg-black/40"
+                    aria-current={lbIndex === i}
+                    className={`aspect-[4/3] h-16 shrink-0 overflow-hidden rounded-lg border transition sm:h-20 ${THUMB_BG} ${
+                      lbIndex === i
+                        ? "border-primary ring-1 ring-primary/50"
+                        : "border-white/15 opacity-60 hover:opacity-100"
                     }`}
-                  />
+                  >
+                    <img src={im} alt="" className="h-full w-full object-contain p-1" />
+                  </button>
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
         <div className="max-h-full overflow-y-auto border-t border-border p-6 lg:self-center lg:border-l lg:border-t-0 lg:p-8">
           <BikeInfo bike={bike} />
@@ -699,7 +781,7 @@ function BikeGallery({
 
   return (
     <div>
-      <div className="relative aspect-[4/3] overflow-hidden bg-white">
+      <div className={`relative aspect-[4/3] overflow-hidden ${STUDIO_BG}`}>
         {mode === "360" && bike.spin360 ? (
           <Spin360Viewer
             frames={bike.spin360}
@@ -719,7 +801,7 @@ function BikeGallery({
               width={1200}
               height={900}
               loading="lazy"
-              className="h-full w-full object-contain p-4 transition duration-500 group-hover:scale-[1.04]"
+              className="h-full w-full scale-125 object-contain p-4 transition duration-500 group-hover:scale-[1.32]"
             />
           </button>
         )}
@@ -749,7 +831,10 @@ function BikeGallery({
           </button>
         )}
       </div>
-      <div className="grid grid-cols-4 gap-1.5 border-b border-border p-2.5">
+      <div
+        className="grid grid-cols-4 gap-1.5 border-b border-border p-2.5"
+        onMouseLeave={() => setActive(0)}
+      >
         {bike.imgs.map((im, i) => (
           <button
             key={i}
@@ -762,7 +847,7 @@ function BikeGallery({
             onMouseEnter={() => setActive(i)}
             aria-label={`Ver foto ${i + 1} da ${bike.name}`}
             aria-current={mode === "gallery" && active === i}
-            className={`relative aspect-[4/3] overflow-hidden rounded-md border bg-white transition ${
+            className={`relative aspect-[4/3] overflow-hidden rounded-md border transition ${THUMB_BG} ${
               mode === "gallery" && active === i
                 ? "border-primary ring-1 ring-primary/40"
                 : "border-border opacity-60 hover:opacity-100"
