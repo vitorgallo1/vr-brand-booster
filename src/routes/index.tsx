@@ -338,6 +338,26 @@ const BIKES: Bike[] = [
   },
 ];
 
+// Quanto maior o divisor, mais arrasto é necessário por quadro — giro mais lento e
+// controlado (comparado ao valor original de 6, que virava a moto inteira num gesto rápido).
+const DRAG_PX_PER_FRAME = 36;
+
+function AngleIndicator({ angle }: { angle: number }) {
+  const rad = (angle * Math.PI) / 180;
+  const x2 = 14 + 10 * Math.sin(rad);
+  const y2 = 14 - 10 * Math.cos(rad);
+  return (
+    <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-2 rounded-full bg-background/85 px-2.5 py-2 shadow backdrop-blur">
+      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden>
+        <circle cx="14" cy="14" r="12" fill="none" className="stroke-border" strokeWidth="1.5" />
+        <line x1="14" y1="14" x2={x2} y2={y2} className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
+        <circle cx="14" cy="14" r="1.5" className="fill-primary" />
+      </svg>
+      <span className="text-[11px] font-semibold tabular-nums text-ink">{Math.round(angle)}°</span>
+    </div>
+  );
+}
+
 function Spin360Viewer({
   frames,
   alt,
@@ -362,7 +382,7 @@ function Spin360Viewer({
     if (Math.abs(dx) > 4) drag.current.moved = true;
     if (!drag.current.moved) return;
     setHint(false);
-    const framesPerDrag = Math.round(dx / 6);
+    const framesPerDrag = Math.round(dx / DRAG_PX_PER_FRAME);
     let next = (drag.current.startIndex - framesPerDrag) % frames.length;
     if (next < 0) next += frames.length;
     setIndex(next);
@@ -372,6 +392,8 @@ function Spin360Viewer({
     if (drag.current && !drag.current.moved) onTap?.();
     drag.current = null;
   };
+
+  const angle = (index / frames.length) * 360;
 
   return (
     <div
@@ -390,6 +412,7 @@ function Spin360Viewer({
         draggable={false}
         className="h-full w-full object-contain pointer-events-none"
       />
+      <AngleIndicator angle={angle} />
       {hint && (
         <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-4">
           <span className="inline-flex items-center gap-1.5 rounded-full bg-background/85 px-3 py-1.5 text-[11px] font-semibold text-ink shadow backdrop-blur">
