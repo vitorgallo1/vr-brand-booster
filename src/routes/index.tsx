@@ -603,7 +603,7 @@ function Lightbox({
 
   return (
     <div
-      className={`fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-3 backdrop-blur-sm transition-opacity duration-300 sm:p-6 ${
+      className={`fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm transition-opacity duration-300 lg:flex lg:items-center lg:justify-center lg:p-6 ${
         visible ? "opacity-100" : "opacity-0"
       }`}
       onClick={onClose}
@@ -615,7 +615,7 @@ function Lightbox({
         aria-modal="true"
         aria-label={`${bike.name} — fotos e detalhes`}
         tabIndex={-1}
-        className={`grid h-full max-h-[88vh] w-full max-w-6xl grid-rows-[1fr_auto] overflow-hidden rounded-2xl bg-card shadow-2xl outline-none transition-all duration-300 lg:grid-cols-[1fr_380px] lg:grid-rows-1 ${
+        className={`grid h-full w-full grid-rows-[auto_1fr] overflow-hidden bg-card outline-none transition-all duration-300 lg:max-h-[88vh] lg:max-w-6xl lg:rounded-2xl lg:shadow-2xl lg:grid-cols-[1fr_380px] lg:grid-rows-1 ${
           visible ? "scale-100 opacity-100" : "scale-95 opacity-0"
         }`}
       >
@@ -638,8 +638,8 @@ function Lightbox({
             </button>
           </div>
 
-          <div className="relative min-h-0 flex-1 py-2">
-            <div className="relative mx-auto aspect-[3/2] h-full max-w-full">
+          <div className="relative py-2 lg:min-h-0 lg:flex-1">
+            <div className="relative mx-auto aspect-[4/3] w-full lg:aspect-auto lg:h-full">
               {lbMode === "360" && bike.spin360 ? (
                 <Spin360Viewer frames={bike.spin360} alt={bike.name} anglePosition="top-left" />
               ) : (
@@ -693,7 +693,7 @@ function Lightbox({
                     setZoomed(false);
                     setLbMode(lbMode === "360" ? "gallery" : "360");
                   }}
-                  className={`absolute bottom-2 left-2 flex h-20 w-20 flex-col items-center justify-center gap-0.5 rounded-full border-2 backdrop-blur transition ${
+                  className={`absolute bottom-2 left-2 flex h-14 w-14 flex-col items-center justify-center gap-0.5 rounded-full border-2 backdrop-blur transition sm:h-20 sm:w-20 ${
                     lbMode === "360"
                       ? "border-white/30 bg-black/50 text-white hover:bg-black/70"
                       : "border-primary/70 bg-black/50 text-primary hover:bg-black/70"
@@ -701,14 +701,14 @@ function Lightbox({
                 >
                   {lbMode === "360" ? (
                     <>
-                      <span aria-hidden className="text-xl leading-none">✕</span>
-                      <span className="text-[10px] font-semibold">Ver fotos</span>
+                      <span aria-hidden className="text-base leading-none sm:text-xl">✕</span>
+                      <span className="text-[8px] font-semibold sm:text-[10px]">Ver fotos</span>
                     </>
                   ) : (
                     <>
-                      <span aria-hidden className="text-xl leading-none">⟳</span>
-                      <span className="text-[11px] font-bold leading-none">360°</span>
-                      <span className="text-[9px] font-medium">Ver em 360</span>
+                      <span aria-hidden className="text-base leading-none sm:text-xl">⟳</span>
+                      <span className="text-[9px] font-bold leading-none sm:text-[11px]">360°</span>
+                      <span className="text-[7px] font-medium sm:text-[9px]">Ver em 360</span>
                     </>
                   )}
                 </button>
