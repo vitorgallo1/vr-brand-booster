@@ -389,6 +389,24 @@ function Spin360Viewer({
   const [hint, setHint] = useState(true);
   const drag = useRef<{ startX: number; startIndex: number; moved: boolean } | null>(null);
 
+  // Em produção os quadros vêm da rede (não do disco local, como em dev), então sem
+  // pré-carregar cada arrasto dispara um fetch novo: a imagem trava até chegar e o
+  // índice (já avançado pelo pointermove) "salta" vários quadros de uma vez quando o
+  // navegador finalmente termina de baixar. Aquecendo o cache do navegador assim que o
+  // viewer monta evita esse efeito de giro brusco.
+  useEffect(() => {
+    const images = frames.map((src) => {
+      const img = new Image();
+      img.src = src;
+      return img;
+    });
+    return () => {
+      images.forEach((img) => {
+        img.src = "";
+      });
+    };
+  }, [frames]);
+
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
     drag.current = { startX: e.clientX, startIndex: index, moved: false };
