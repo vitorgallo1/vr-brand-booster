@@ -3,6 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import heroWallpaper from "@/assets/wallpaperhero.png";
 import showroom from "@/assets/showroom.jpg";
 import logoVR from "@/assets/logo-vr.jpg.asset.json";
+import logoVRHorizontal from "@/assets/logohorizontal.png";
 import bancoItau from "@/assets/bancos/itau.svg";
 import bancoBradesco from "@/assets/bancos/bradesco.svg";
 import bancoSantander from "@/assets/bancos/santander.svg";
@@ -66,15 +67,20 @@ function Index() {
   );
 }
 
-function Logo() {
+function Logo({ variant = "default" }: { variant?: "default" | "horizontal" }) {
+  const isHorizontal = variant === "horizontal";
   return (
-    <a href="#top" className="flex items-center" aria-label="VR Multimarcas">
+    <a
+      href="#top"
+      className={isHorizontal ? "flex items-center -ml-4 md:-ml-6" : "flex items-center"}
+      aria-label="VR Multimarcas"
+    >
       <img
-        src={logoVR.url}
+        src={isHorizontal ? logoVRHorizontal : logoVR.url}
         alt="VR Multimarcas"
-        width={200}
-        height={64}
-        className="h-10 w-auto md:h-11"
+        width={isHorizontal ? 262 : 200}
+        height={isHorizontal ? 36 : 64}
+        className={isHorizontal ? "h-9 w-auto md:h-10" : "h-10 w-auto md:h-11"}
       />
     </a>
   );
@@ -88,7 +94,7 @@ function Nav() {
       className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur-md"
     >
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
-        <Logo />
+        <Logo variant="horizontal" />
         <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
           <a href="#linha" className="transition hover:text-primary">Motos</a>
           <a href="#financiamento" className="transition hover:text-primary">Financiamento</a>
@@ -343,6 +349,23 @@ const BIKES: Bike[] = [
 // controlado (comparado ao valor original de 6, que virava a moto inteira num gesto rápido).
 const DRAG_PX_PER_FRAME = 36;
 
+// Carrega no máximo N imagens por vez. Disparar as ~20-40 imagens de uma sequência 360°
+// todas de uma vez faz o navegador enfileirar a maioria como prioridade "Low" e, sob
+// contenção de conexão, abortar essas requisições de baixa prioridade (visto em produção
+// como NS_BINDING_ABORTED) — indo uma de cada vez por "worker" evita essa contenção.
+function preloadFrames(urls: string[], concurrency = 4) {
+  let next = 0;
+  const loadNext = () => {
+    const url = urls[next++];
+    if (!url) return;
+    const img = new Image();
+    img.onload = loadNext;
+    img.onerror = loadNext;
+    img.src = url;
+  };
+  for (let i = 0; i < Math.min(concurrency, urls.length); i++) loadNext();
+}
+
 // Fundo escuro de estúdio usado atrás dos recortes com fundo transparente — mesmo
 // tratamento do card e do lightbox, para a moto parecer fotografada no mesmo ambiente.
 const STUDIO_BG =
@@ -395,16 +418,12 @@ function Spin360Viewer({
   // navegador finalmente termina de baixar. Aquecendo o cache do navegador assim que o
   // viewer monta evita esse efeito de giro brusco.
   useEffect(() => {
-    const images = frames.map((src) => {
-      const img = new Image();
-      img.src = src;
-      return img;
-    });
-    return () => {
-      images.forEach((img) => {
-        img.src = "";
-      });
-    };
+    // Sem cleanup de propósito: interromper o preload no meio (ex: img.src = "") é o que
+    // gerava os NS_BINDING_ABORTED em produção (o viewer remonta ao trocar de modo/abrir
+    // o lightbox, e cancelar o fetch em andamento só forçava uma nova tentativa depois).
+    // Deixar o download seguir em segundo plano é inofensivo — o navegador dedupe pedidos
+    // repetidos pra mesma URL e o resultado fica no cache HTTP de qualquer forma.
+    preloadFrames(frames);
   }, [frames]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
