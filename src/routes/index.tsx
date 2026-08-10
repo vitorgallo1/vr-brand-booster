@@ -409,6 +409,10 @@ function Spin360Viewer({
   anglePosition?: "top-left" | "bottom-left";
 }) {
   const [index, setIndex] = useState(0);
+  // Quadro efetivamente exibido no <img>. Só acompanha `index` depois que o quadro alvo
+  // termina de carregar — ver efeito abaixo. Isso é o que evita a tela quebrada/vazia no
+  // primeiro giro, antes do cache do navegador estar aquecido.
+  const [displayIndex, setDisplayIndex] = useState(0);
   const [hint, setHint] = useState(true);
   const drag = useRef<{ startX: number; startIndex: number; moved: boolean } | null>(null);
 
@@ -425,6 +429,26 @@ function Spin360Viewer({
     // repetidos pra mesma URL e o resultado fica no cache HTTP de qualquer forma.
     preloadFrames(frames);
   }, [frames]);
+
+  // Só troca o quadro exibido depois que ele terminou de carregar de fato (cache hit
+  // resolve quase instantâneo; cache miss mantém o quadro anterior na tela em vez de
+  // piscar em branco). É esse buffer que fazia o giro "não funcionar" no primeiro arrasto
+  // em produção — sem ele, o <img src> apontava pra um quadro ainda em voo.
+  useEffect(() => {
+    let cancelled = false;
+    const img = new Image();
+    img.fetchPriority = "high";
+    img.onload = () => {
+      if (!cancelled) setDisplayIndex(index);
+    };
+    img.onerror = () => {
+      if (!cancelled) setDisplayIndex(index);
+    };
+    img.src = frames[index];
+    return () => {
+      cancelled = true;
+    };
+  }, [index, frames]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -448,7 +472,7 @@ function Spin360Viewer({
     drag.current = null;
   };
 
-  const angle = (index / frames.length) * 360;
+  const angle = (displayIndex / frames.length) * 360;
 
   return (
     <div
@@ -462,7 +486,7 @@ function Spin360Viewer({
       onPointerCancel={endDrag}
     >
       <img
-        src={frames[index]}
+        src={frames[displayIndex]}
         alt={alt}
         draggable={false}
         className="h-full w-full object-contain pointer-events-none"
