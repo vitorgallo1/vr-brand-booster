@@ -1,6 +1,20 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  ArrowRight,
+  CalendarClock,
+  Compass,
+  DollarSign,
+  LayoutGrid,
+  MessageCircle,
+  Percent,
+  Quote,
+  ShieldCheck,
+  Wallet,
+  Zap,
+} from "lucide-react";
 import heroWallpaper from "@/assets/wallpaperhero.png";
+import heroBike from "@/assets/hero-bike.jpg";
 import showroom from "@/assets/showroom.jpg";
 import logoVR from "@/assets/logo-vr.jpg.asset.json";
 import logoVRHorizontal from "@/assets/logohorizontal.png";
@@ -49,6 +63,16 @@ export const Route = createFileRoute("/")({
 const WHATSAPP =
   "https://wa.me/5549999999999?text=Ol%C3%A1!%20Gostaria%20de%20conhecer%20as%20motos%20da%20VR%20Multimarcas.";
 
+// Usado pela nav desktop, nav mobile e footer — os 3 lugares que listam as mesmas
+// âncoras da página, cada um com seu próprio estilo de link.
+const NAV_LINKS = [
+  { href: "#linha", label: "Motos" },
+  { href: "#financiamento", label: "Financiamento" },
+  { href: "#experiencia", label: "Experiência" },
+  { href: "#servicos", label: "Serviços" },
+  { href: "#visite", label: "Visite" },
+];
+
 function Index() {
   return (
     <div className="min-h-screen bg-background text-foreground">
@@ -96,11 +120,11 @@ function Nav() {
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-5 lg:px-8">
         <Logo variant="horizontal" />
         <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex">
-          <a href="#linha" className="transition hover:text-primary">Motos</a>
-          <a href="#financiamento" className="transition hover:text-primary">Financiamento</a>
-          <a href="#experiencia" className="transition hover:text-primary">Experiência</a>
-          <a href="#servicos" className="transition hover:text-primary">Serviços</a>
-          <a href="#visite" className="transition hover:text-primary">Visite</a>
+          {NAV_LINKS.map((l) => (
+            <a key={l.href} href={l.href} className="transition hover:text-primary">
+              {l.label}
+            </a>
+          ))}
         </nav>
         <div className="flex items-center gap-2">
           <a
@@ -129,11 +153,16 @@ function Nav() {
       </div>
       {mobileOpen && (
         <nav className="flex flex-col gap-1 border-t border-border bg-background px-5 py-4 text-sm font-medium text-muted-foreground md:hidden">
-          <a href="#linha" onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-2.5 transition hover:bg-secondary hover:text-primary">Motos</a>
-          <a href="#financiamento" onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-2.5 transition hover:bg-secondary hover:text-primary">Financiamento</a>
-          <a href="#experiencia" onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-2.5 transition hover:bg-secondary hover:text-primary">Experiência</a>
-          <a href="#servicos" onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-2.5 transition hover:bg-secondary hover:text-primary">Serviços</a>
-          <a href="#visite" onClick={() => setMobileOpen(false)} className="rounded-lg px-3 py-2.5 transition hover:bg-secondary hover:text-primary">Visite</a>
+          {NAV_LINKS.map((l) => (
+            <a
+              key={l.href}
+              href={l.href}
+              onClick={() => setMobileOpen(false)}
+              className="rounded-lg px-3 py-2.5 transition hover:bg-secondary hover:text-primary"
+            >
+              {l.label}
+            </a>
+          ))}
           <a
             href={WHATSAPP}
             className="mt-2 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground shadow-cta transition hover:bg-primary-dark"
@@ -503,6 +532,42 @@ function Spin360Viewer({
   );
 }
 
+// Lista de specs em pill — usada no sidebar do lightbox (BikeInfo) e no card do
+// catálogo (Lineup), com o mesmo pill mas espaçamento externo diferente.
+function BikeSpecs({ specs, className = "" }: { specs: string[]; className?: string }) {
+  return (
+    <ul className={`flex flex-wrap gap-1.5 ${className}`}>
+      {specs.map((s) => (
+        <li
+          key={s}
+          className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
+        >
+          {s}
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// Bloco "À vista / preço / parcela / CTA" — idêntico no sidebar do lightbox e no
+// card do catálogo, só variando o espaçamento acima do botão.
+function BikePriceCTA({ bike, ctaClassName = "mt-5" }: { bike: Bike; ctaClassName?: string }) {
+  return (
+    <div>
+      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">À vista</p>
+      <p className="font-display text-3xl font-bold leading-none text-ink">{bike.cash}</p>
+      <p className="mt-1.5 text-sm font-semibold text-primary">ou {bike.parcel}</p>
+      <a
+        href={bike.wa}
+        className={`${ctaClassName} inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-dark`}
+      >
+        Simular no WhatsApp
+        <span aria-hidden>→</span>
+      </a>
+    </div>
+  );
+}
+
 function BikeInfo({ bike }: { bike: Bike }) {
   return (
     <div className="flex flex-col gap-6">
@@ -520,30 +585,8 @@ function BikeInfo({ bike }: { bike: Bike }) {
         <h3 className="mt-4 font-display text-3xl font-bold text-ink">{bike.name}</h3>
         <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{bike.desc}</p>
       </div>
-
-      <ul className="flex flex-wrap gap-1.5 border-y border-border py-5">
-        {bike.specs.map((s) => (
-          <li
-            key={s}
-            className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
-          >
-            {s}
-          </li>
-        ))}
-      </ul>
-
-      <div>
-        <p className="text-[11px] uppercase tracking-widest text-muted-foreground">À vista</p>
-        <p className="font-display text-3xl font-bold leading-none text-ink">{bike.cash}</p>
-        <p className="mt-1.5 text-sm font-semibold text-primary">ou {bike.parcel}</p>
-        <a
-          href={bike.wa}
-          className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-dark"
-        >
-          Simular no WhatsApp
-          <span aria-hidden>→</span>
-        </a>
-      </div>
+      <BikeSpecs specs={bike.specs} className="border-y border-border py-5" />
+      <BikePriceCTA bike={bike} />
     </div>
   );
 }
@@ -992,29 +1035,9 @@ function Lineup() {
                 <h3 className="font-display text-xl font-bold text-ink">{b.name}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.desc}</p>
               </div>
-              <ul className="flex flex-wrap gap-1.5">
-                {b.specs.map((s) => (
-                  <li
-                    key={s}
-                    className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
-                  >
-                    {s}
-                  </li>
-                ))}
-              </ul>
+              <BikeSpecs specs={b.specs} />
               <div className="mt-auto border-t border-border pt-4">
-                <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
-                  À vista
-                </p>
-                <p className="font-display text-3xl font-bold leading-none text-ink">{b.cash}</p>
-                <p className="mt-1.5 text-sm font-semibold text-primary">ou {b.parcel}</p>
-                <a
-                  href={b.wa}
-                  className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-dark"
-                >
-                  Simular no WhatsApp
-                  <span aria-hidden>→</span>
-                </a>
+                <BikePriceCTA bike={b} ctaClassName="mt-4" />
               </div>
             </div>
           </article>
@@ -1047,6 +1070,58 @@ function Lineup() {
   );
 }
 
+// Cada seção "eyebrow + título" da página reusa o mesmo par de estilos —
+// centralizado aqui pra não divergir seção a seção.
+function SectionHeading({
+  kicker,
+  title,
+  icon: Icon,
+  className = "",
+}: {
+  kicker: string;
+  title: React.ReactNode;
+  icon?: React.ComponentType<{ className?: string }>;
+  className?: string;
+}) {
+  return (
+    <div className={className}>
+      {Icon ? (
+        <span className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-background/60 py-1 pl-1.5 pr-3.5 text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+          <span className="grid h-5 w-5 place-items-center rounded-full bg-primary/15">
+            <Icon className="h-3 w-3" aria-hidden />
+          </span>
+          {kicker}
+        </span>
+      ) : (
+        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
+          {kicker}
+        </p>
+      )}
+      <h2 className="mt-4 font-display text-4xl font-bold leading-[1.05] text-ink sm:text-5xl">
+        {title}
+      </h2>
+    </div>
+  );
+}
+
+const EXPERIENCE_FEATURES = [
+  {
+    icon: LayoutGrid,
+    t: "Curadoria multimarcas",
+    d: "Trabalhamos com as principais fabricantes — você escolhe pelo modelo, não pela marca.",
+  },
+  {
+    icon: Compass,
+    t: "Test-ride sem compromisso",
+    d: "Reserve, pilote e sinta. Se não for a sua moto, a gente encontra outra.",
+  },
+  {
+    icon: MessageCircle,
+    t: "Atendimento humano",
+    d: "Zero robô, zero enrolação. Fala com gente que respira duas rodas.",
+  },
+];
+
 function Experience() {
   return (
     <section id="experiencia" className="border-y border-border bg-surface">
@@ -1072,34 +1147,19 @@ function Experience() {
           </div>
         </div>
         <div className="order-1 max-w-lg lg:order-2">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-            A experiência VR
-          </p>
-          <h2 className="mt-4 font-display text-4xl font-bold leading-[1.05] text-ink sm:text-5xl">
-            Comprar moto pode ser simples de verdade.
-          </h2>
+          <SectionHeading
+            kicker="A experiência VR"
+            title="Comprar moto pode ser simples de verdade."
+          />
           <p className="mt-5 text-muted-foreground">
             Nada de pressão, letra miúda ou aquele papo de vendedor. Aqui você conversa com quem
             pilota, testa antes de decidir e sai com a moto certa pra você.
           </p>
-          <ul className="mt-8 space-y-4">
-            {[
-              {
-                t: "Curadoria multimarcas",
-                d: "Trabalhamos com as principais fabricantes — você escolhe pelo modelo, não pela marca.",
-              },
-              {
-                t: "Test-ride sem compromisso",
-                d: "Reserve, pilote e sinta. Se não for a sua moto, a gente encontra outra.",
-              },
-              {
-                t: "Atendimento humano",
-                d: "Zero robô, zero enrolação. Fala com gente que respira duas rodas.",
-              },
-            ].map((f) => (
+          <ul className="mt-8 space-y-5">
+            {EXPERIENCE_FEATURES.map((f) => (
               <li key={f.t} className="flex gap-4">
-                <span className="mt-1 grid h-8 w-8 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-                  ✓
+                <span className="mt-0.5 grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
+                  <f.icon className="h-5 w-5" strokeWidth={2} aria-hidden />
                 </span>
                 <div>
                   <p className="font-semibold text-ink">{f.t}</p>
@@ -1123,14 +1183,7 @@ function Services() {
   ];
   return (
     <section id="servicos" className="mx-auto max-w-7xl px-5 py-20 lg:px-8 lg:py-24">
-      <div className="mb-12 max-w-2xl">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-          Serviços
-        </p>
-        <h2 className="mt-4 font-display text-4xl font-bold leading-[1.05] text-ink sm:text-5xl">
-          Muito além da venda.
-        </h2>
-      </div>
+      <SectionHeading kicker="Serviços" title="Muito além da venda." className="mb-12 max-w-2xl" />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((s, i) => (
           <div
@@ -1147,82 +1200,115 @@ function Services() {
   );
 }
 
+const FINANCING_STATS = [
+  { icon: CalendarClock, k: "Até 48x", v: "Prazo estendido" },
+  { icon: Wallet, k: "Entrada", v: "A partir de 10%" },
+  { icon: Zap, k: "24h", v: "Aprovação rápida" },
+  { icon: Percent, k: "0%", v: "De burocracia" },
+];
+
+const BANK_PARTNERS = [
+  { name: "Itaú", logo: bancoItau },
+  { name: "Bradesco", logo: bancoBradesco },
+  { name: "Santander", logo: bancoSantander },
+  { name: "Banco do Brasil", logo: bancoBB },
+  { name: "Sicredi", logo: bancoSicredi },
+  { name: "Caixa", logo: bancoCaixa },
+];
+
 function Financing() {
   return (
     <section
       id="financiamento"
       className="relative overflow-hidden py-20 lg:py-24"
     >
-      <div
+      <img
+        src={heroBike}
+        alt=""
         aria-hidden
-        className="absolute inset-0 opacity-40 [background-image:radial-gradient(circle_at_20%_0%,hsl(43_74%_52%/0.25),transparent_50%),radial-gradient(circle_at_80%_100%,hsl(43_74%_52%/0.18),transparent_50%)]"
+        loading="lazy"
+        className="absolute inset-0 hidden h-full w-full object-cover object-[48%_55%] opacity-15 [mask-image:linear-gradient(90deg,transparent,black_35%,black_75%,transparent)] lg:block"
       />
+      <div aria-hidden className="absolute inset-0 bg-background/90" />
       <div className="relative mx-auto grid max-w-7xl gap-12 px-5 lg:grid-cols-[1fr_1.1fr] lg:items-center lg:px-8">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-            Financiamento
-          </p>
-          <h2 className="mt-4 font-display text-4xl font-bold leading-[1.05] text-ink sm:text-5xl">
-            Sua moto cabe no orçamento.
-          </h2>
+          <SectionHeading
+            kicker="Financiamento"
+            title="Sua moto cabe no orçamento."
+            icon={DollarSign}
+          />
           <p className="mt-5 max-w-md text-muted-foreground">
             Trabalhamos com todos os principais bancos e financeiras. Análise em poucas horas,
             entrada facilitada e o prazo que fecha na sua rotina.
           </p>
-          <div className="mt-8">
+          <div className="mt-6 h-px w-10 bg-primary" aria-hidden />
+          <div className="mt-6">
             <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
               Financeiras parceiras
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2.5">
-              {[
-                { name: "Itaú", logo: bancoItau },
-                { name: "Bradesco", logo: bancoBradesco },
-                { name: "Santander", logo: bancoSantander },
-                { name: "Banco do Brasil", logo: bancoBB },
-                { name: "Sicredi", logo: bancoSicredi },
-                { name: "Caixa", logo: bancoCaixa },
-              ].map((b) => (
-                <span
-                  key={b.name}
-                  className="flex h-11 items-center rounded-lg bg-white px-3.5 shadow-sm"
-                  title={b.name}
-                >
-                  <img src={b.logo} alt={b.name} className="h-5 w-auto object-contain sm:h-6" />
-                </span>
-              ))}
+            <div className="mt-3 rounded-xl border border-primary/25 bg-background/70 p-4 backdrop-blur-sm shadow-card">
+              <div className="grid grid-cols-3 gap-2.5">
+                {BANK_PARTNERS.map((b) => (
+                  <span
+                    key={b.name}
+                    className="flex h-11 items-center justify-center rounded-lg bg-white px-3.5 shadow-sm"
+                    title={b.name}
+                  >
+                    <img src={b.logo} alt={b.name} className="h-5 w-auto object-contain sm:h-6" />
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
         </div>
-        <div className="rounded-2xl border border-primary/25 bg-background/70 p-8 backdrop-blur-sm shadow-card-hover">
-          <div className="grid gap-6 sm:grid-cols-2">
-            {[
-              { k: "Até 48x", v: "prazo estendido" },
-              { k: "Entrada", v: "a partir de 10%" },
-              { k: "24h", v: "aprovação rápida" },
-              { k: "0%", v: "de burocracia" },
-            ].map((f) => (
-              <div key={f.v} className="border-l-2 border-primary pl-4">
-                <p className="font-display text-2xl font-bold text-ink">{f.k}</p>
-                <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
-                  {f.v}
-                </p>
+        <div className="rounded-2xl border border-primary/25 bg-background/70 p-5 backdrop-blur-sm shadow-card">
+          <div className="divide-y divide-border/60">
+            {[FINANCING_STATS.slice(0, 2), FINANCING_STATS.slice(2, 4)].map((row, i) => (
+              <div key={i} className="grid grid-cols-2 divide-x divide-border/60">
+                {row.map((f) => (
+                  <div
+                    key={f.v}
+                    className="flex flex-col items-center px-5 py-4 text-center"
+                  >
+                    <span className="grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-primary">
+                      <f.icon className="h-5 w-5" strokeWidth={2} aria-hidden />
+                    </span>
+                    <p className="mt-3 font-display text-2xl font-bold text-ink">{f.k}</p>
+                    <p className="mt-1 text-xs uppercase tracking-widest text-muted-foreground">
+                      {f.v}
+                    </p>
+                  </div>
+                ))}
               </div>
             ))}
           </div>
           <a
             href={WHATSAPP}
-            className="mt-8 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-6 py-4 text-sm font-semibold text-primary-foreground shadow-cta transition hover:bg-primary-dark"
+            className="mt-8 inline-flex w-full items-center justify-center gap-3 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-cta transition hover:brightness-105"
           >
+            <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-black/15">
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </span>
             Simular financiamento agora
-            <span aria-hidden>→</span>
           </a>
-          <p className="mt-3 text-center text-xs text-muted-foreground">
-            Sem compromisso. Análise gratuita.
+          <p className="mt-3 flex items-center justify-center gap-1.5 text-center text-xs text-muted-foreground">
+            <ShieldCheck className="h-3.5 w-3.5 text-primary" aria-hidden />
+            Sem compromisso. <span className="text-primary">Análise gratuita.</span>
           </p>
         </div>
       </div>
     </section>
   );
+}
+
+function initials(name: string) {
+  return name
+    .split(" ")
+    .filter(Boolean)
+    .map((p) => p[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 }
 
 function Testimonials() {
@@ -1234,27 +1320,39 @@ function Testimonials() {
   return (
     <section className="border-y border-border bg-surface">
       <div className="mx-auto max-w-7xl px-5 pb-20 pt-10 lg:px-8 lg:pb-24 lg:pt-14">
-        <div className="mb-12 max-w-2xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-            Quem já pilota com a gente
-          </p>
-          <h2 className="mt-4 font-display text-4xl font-bold leading-[1.05] text-ink sm:text-5xl">
-            Confiança que se conta em quilômetros.
-          </h2>
-        </div>
+        <SectionHeading
+          kicker="Quem já pilota com a gente"
+          title="Confiança que se conta em quilômetros."
+          className="mb-12 max-w-2xl"
+        />
         <div className="grid gap-5 md:grid-cols-3">
           {items.map((r) => (
             <figure
               key={r.n}
-              className="flex h-full flex-col rounded-xl border border-border bg-card p-6 shadow-card"
+              className="relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card p-6 shadow-card"
             >
-              <div className="flex gap-0.5 text-primary" aria-label="5 estrelas">★★★★★</div>
-              <blockquote className="mt-4 flex-1 text-sm leading-relaxed text-foreground">
+              <Quote
+                className="absolute -right-3 -top-3 h-20 w-20 text-primary/10"
+                strokeWidth={1}
+                aria-hidden
+              />
+              <div className="relative flex gap-0.5 text-primary" aria-label="5 estrelas">
+                ★★★★★
+              </div>
+              <blockquote className="relative mt-4 flex-1 text-sm leading-relaxed text-foreground">
                 “{r.t}”
               </blockquote>
-              <figcaption className="mt-6 border-t border-border pt-4 text-sm">
-                <p className="font-semibold text-ink">{r.n}</p>
-                <p className="text-xs text-muted-foreground">{r.c}</p>
+              <figcaption className="relative mt-6 flex items-center gap-3 border-t border-border pt-4">
+                <span
+                  className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary/10 text-xs font-bold text-primary"
+                  aria-hidden
+                >
+                  {initials(r.n)}
+                </span>
+                <div className="text-sm">
+                  <p className="font-semibold text-ink">{r.n}</p>
+                  <p className="text-xs text-muted-foreground">{r.c}</p>
+                </div>
               </figcaption>
             </figure>
           ))}
@@ -1269,12 +1367,10 @@ function Visit() {
     <section id="visite" className="border-t border-border bg-surface">
       <div className="mx-auto grid max-w-7xl gap-12 px-5 py-20 lg:grid-cols-[1.1fr_1fr] lg:items-center lg:px-8 lg:py-24">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-            Venha nos visitar
-          </p>
-          <h2 className="mt-4 font-display text-4xl font-bold leading-[1.05] text-ink sm:text-5xl">
-            Um café, uma volta e a sua próxima moto.
-          </h2>
+          <SectionHeading
+            kicker="Venha nos visitar"
+            title="Um café, uma volta e a sua próxima moto."
+          />
           <p className="mt-5 max-w-md text-muted-foreground">
             Nosso showroom foi feito pra você passar tempo. Chega, escolhe, testa. Sem pressa e
             sem pressão.
@@ -1360,11 +1456,11 @@ function Footer() {
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-ink">Navegação</p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
-            <a href="#linha" className="transition hover:text-primary">Motos</a>
-            <a href="#financiamento" className="transition hover:text-primary">Financiamento</a>
-            <a href="#experiencia" className="transition hover:text-primary">Experiência</a>
-            <a href="#servicos" className="transition hover:text-primary">Serviços</a>
-            <a href="#visite" className="transition hover:text-primary">Visite</a>
+            {NAV_LINKS.map((l) => (
+              <a key={l.href} href={l.href} className="transition hover:text-primary">
+                {l.label}
+              </a>
+            ))}
           </div>
         </div>
         <div>
