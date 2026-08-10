@@ -24,31 +24,54 @@ import bancoSantander from "@/assets/bancos/santander.svg";
 import bancoBB from "@/assets/bancos/bb.svg";
 import bancoSicredi from "@/assets/bancos/sicredi.svg";
 import bancoCaixa from "@/assets/bancos/caixa.svg";
+import spinManifest from "@/assets/motos/360-web/manifest.json";
 
 // Todas as fotos das motos vêm da sequência de giro 360° do fabricante
 // (recortes com fundo transparente) — o fundo de estúdio (STUDIO_BG) é aplicado por
 // trás delas para dar um visual consistente em toda a vitrine.
-const globFrames = (pattern: string) =>
-  Object.entries(
-    import.meta.glob("/src/assets/motos/360/**/*.webp", {
-      eager: true,
-      query: "?url",
-      import: "default",
-    }) as Record<string, string>,
-  )
-    .filter(([path]) => path.includes(`/360/${pattern}/`))
-    .sort(([a], [b]) => a.localeCompare(b))
+//
+// O que é importado aqui é a saída de `npm run build:360`, não os originais: eles são
+// 2560x1707 (~17,5 MB de bitmap decodificado por quadro) para um card que renderiza a
+// 388x291. Cada moto tem duas camadas — sprites de 640px para o giro do card (3-5
+// requisições no lugar de 19-44) e quadros de 1280px para o lightbox, onde o detalhe
+// importa. Ver scripts/build-360.mjs.
+type SpinSprite = {
+  sheets: string[];
+  count: number;
+  cols: number;
+  rows: number;
+  perSheet: number;
+  frameW: number;
+  frameH: number;
+};
+
+const SPIN_URLS = import.meta.glob("/src/assets/motos/360-web/**/*.webp", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+
+// `numeric` importa: sem ele f-10 viria antes de f-02, e a ordem dos quadros é o giro.
+const urlsFor = (model: string, prefix: "f" | "s") =>
+  Object.entries(SPIN_URLS)
+    .filter(([path]) => path.includes(`/360-web/${model}/${prefix}-`))
+    .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
     .map(([, url]) => url);
 
+const spin = (model: keyof typeof spinManifest) => ({
+  frames: urlsFor(model, "f"),
+  sprite: { sheets: urlsFor(model, "s"), ...spinManifest[model] } as SpinSprite,
+});
+
 const SPIN_360 = {
-  shi175: globFrames("shi175"),
-  jet125: globFrames("jet125"),
-  jef150: globFrames("jef150"),
-  sbm250s: globFrames("sbm250s"),
-  sbm250t: globFrames("sbm250t"),
-  shi400sc: globFrames("shi400sc"),
-  sbm600v: globFrames("sbm600v"),
-  sbm600r: globFrames("sbm600r"),
+  shi175: spin("shi175"),
+  jet125: spin("jet125"),
+  jef150: spin("jef150"),
+  sbm250s: spin("sbm250s"),
+  sbm250t: spin("sbm250t"),
+  shi400sc: spin("shi400sc"),
+  sbm600v: spin("sbm600v"),
+  sbm600r: spin("sbm600r"),
 };
 
 // Seleciona 4 quadros específicos da sequência de giro 360° para as miniaturas da
@@ -267,6 +290,7 @@ type Bike = {
   badge?: string;
   imgs: string[];
   spin360?: string[];
+  spinSprite?: SpinSprite;
   wa: string;
 };
 
@@ -289,8 +313,9 @@ const BIKES: Bike[] = [
     cash: "R$ 16.490",
     parcel: "48x de R$ 349",
     badge: "Mais vendida",
-    imgs: pickAt(SPIN_360.shi175, [7, 0, 14, 21]),
-    spin360: SPIN_360.shi175,
+    imgs: pickAt(SPIN_360.shi175.frames, [7, 0, 14, 21]),
+    spin360: SPIN_360.shi175.frames,
+    spinSprite: SPIN_360.shi175.sprite,
     wa: wa("SHI 175"),
   },
   {
@@ -300,8 +325,9 @@ const BIKES: Bike[] = [
     specs: ["125cc", "Câmbio automático", "Baixo consumo"],
     cash: "R$ 11.490",
     parcel: "48x de R$ 239",
-    imgs: pickAt(SPIN_360.jet125, [6, 0, 12, 18]),
-    spin360: SPIN_360.jet125,
+    imgs: pickAt(SPIN_360.jet125.frames, [6, 0, 12, 18]),
+    spin360: SPIN_360.jet125.frames,
+    spinSprite: SPIN_360.jet125.sprite,
     wa: wa("JET 125"),
   },
   {
@@ -311,8 +337,9 @@ const BIKES: Bike[] = [
     specs: ["150cc", "Painel digital", "Freio a disco"],
     cash: "R$ 14.790",
     parcel: "48x de R$ 309",
-    imgs: pickAt(SPIN_360.jef150, [7, 0, 14, 21]),
-    spin360: SPIN_360.jef150,
+    imgs: pickAt(SPIN_360.jef150.frames, [7, 0, 14, 21]),
+    spin360: SPIN_360.jef150.frames,
+    spinSprite: SPIN_360.jef150.sprite,
     wa: wa("JEF 150"),
   },
   {
@@ -323,8 +350,9 @@ const BIKES: Bike[] = [
     cash: "R$ 23.490",
     parcel: "48x de R$ 489",
     badge: "Lançamento",
-    imgs: pickAt(SPIN_360.sbm250s, [11, 0, 22, 33]),
-    spin360: SPIN_360.sbm250s,
+    imgs: pickAt(SPIN_360.sbm250s.frames, [11, 0, 22, 33]),
+    spin360: SPIN_360.sbm250s.frames,
+    spinSprite: SPIN_360.sbm250s.sprite,
     wa: wa("SBM 250s"),
   },
   {
@@ -334,8 +362,9 @@ const BIKES: Bike[] = [
     specs: ["250cc DOHC", "6 marchas", "ABS duplo canal"],
     cash: "R$ 24.990",
     parcel: "48x de R$ 519",
-    imgs: pickAt(SPIN_360.sbm250t, [5, 0, 11, 16]),
-    spin360: SPIN_360.sbm250t,
+    imgs: pickAt(SPIN_360.sbm250t.frames, [5, 0, 11, 16]),
+    spin360: SPIN_360.sbm250t.frames,
+    spinSprite: SPIN_360.sbm250t.sprite,
     wa: wa("SBM 250t"),
   },
   {
@@ -345,8 +374,9 @@ const BIKES: Bike[] = [
     specs: ["400cc", "ABS duplo canal", "Painel TFT"],
     cash: "R$ 24.990",
     parcel: "48x de R$ 521",
-    imgs: pickAt(SPIN_360.shi400sc, [6, 0, 12, 18]),
-    spin360: SPIN_360.shi400sc,
+    imgs: pickAt(SPIN_360.shi400sc.frames, [6, 0, 12, 18]),
+    spin360: SPIN_360.shi400sc.frames,
+    spinSprite: SPIN_360.shi400sc.sprite,
     wa: wa("SHI 400sc"),
   },
   {
@@ -356,8 +386,9 @@ const BIKES: Bike[] = [
     specs: ["600cc V4", "ABS duplo canal", "Painel TFT Bluetooth"],
     cash: "R$ 51.990",
     parcel: "48x de R$ 1.089",
-    imgs: pickAt(SPIN_360.sbm600v, [0, 5, 10, 15]),
-    spin360: SPIN_360.sbm600v,
+    imgs: pickAt(SPIN_360.sbm600v.frames, [0, 5, 10, 15]),
+    spin360: SPIN_360.sbm600v.frames,
+    spinSprite: SPIN_360.sbm600v.sprite,
     wa: wa("SBM 600V"),
   },
   {
@@ -368,8 +399,9 @@ const BIKES: Bike[] = [
     cash: "R$ 52.490",
     parcel: "48x de R$ 1.099",
     badge: "Top de linha",
-    imgs: pickAt(SPIN_360.sbm600r, [0, 4, 9, 14]),
-    spin360: SPIN_360.sbm600r,
+    imgs: pickAt(SPIN_360.sbm600r.frames, [0, 4, 9, 14]),
+    spin360: SPIN_360.sbm600r.frames,
+    spinSprite: SPIN_360.sbm600r.sprite,
     wa: wa("SBM 600R"),
   },
 ];
@@ -378,18 +410,20 @@ const BIKES: Bike[] = [
 // controlado (comparado ao valor original de 6, que virava a moto inteira num gesto rápido).
 const DRAG_PX_PER_FRAME = 36;
 
-// Carrega no máximo N imagens por vez. Disparar as ~20-40 imagens de uma sequência 360°
-// todas de uma vez faz o navegador enfileirar a maioria como prioridade "Low" e, sob
-// contenção de conexão, abortar essas requisições de baixa prioridade (visto em produção
-// como NS_BINDING_ABORTED) — indo uma de cada vez por "worker" evita essa contenção.
-function preloadFrames(urls: string[], concurrency = 4) {
+// Carrega no máximo N imagens por vez, com uma pequena pausa entre elas. Disparar as
+// imagens de uma sequência 360° todas de uma vez faz o navegador enfileirar a maioria
+// como prioridade "Low" e, sob contenção de conexão, abortar essas requisições (visto em
+// produção como NS_BINDING_ABORTED) — indo uma de cada vez por "worker" evita essa
+// contenção. Com os sprites do card isso vira ruído (são 3-5 arquivos), mas ainda vale
+// para os ~19-44 quadros individuais que o lightbox carrega.
+function preloadFrames(urls: string[], concurrency = 2, delayMs = 60) {
   let next = 0;
   const loadNext = () => {
     const url = urls[next++];
     if (!url) return;
     const img = new Image();
-    img.onload = loadNext;
-    img.onerror = loadNext;
+    img.onload = () => setTimeout(loadNext, delayMs);
+    img.onerror = () => setTimeout(loadNext, delayMs);
     img.src = url;
   };
   for (let i = 0; i < Math.min(concurrency, urls.length); i++) loadNext();
@@ -426,17 +460,30 @@ function AngleIndicator({
   );
 }
 
+// Aceita as duas camadas geradas pelo build:360 — `sprite` (card) ou `frames`
+// (lightbox). A diferença fica contida em duas coisas: qual URL precisa estar carregada
+// para poder exibir o quadro `i`, e como esse quadro é pintado. Todo o resto (arrasto,
+// buffer de carregamento, indicador de ângulo) é comum aos dois modos.
 function Spin360Viewer({
   frames,
+  sprite,
   alt,
   onTap,
   anglePosition = "bottom-left",
 }: {
-  frames: string[];
+  frames?: string[];
+  sprite?: SpinSprite;
   alt: string;
   onTap?: () => void;
   anglePosition?: "top-left" | "bottom-left";
 }) {
+  const frameCount = sprite ? sprite.count : (frames?.length ?? 0);
+  // No modo sprite, o que "carrega" um quadro é a sheet que o contém — por isso vários
+  // quadros compartilham a mesma URL e o giro dentro de uma sheet já carregada é instantâneo.
+  const urlAt = (i: number) =>
+    sprite ? sprite.sheets[Math.floor(i / sprite.perSheet)] : (frames?.[i] ?? "");
+  const sources = sprite ? sprite.sheets : (frames ?? []);
+
   const [index, setIndex] = useState(0);
   // Quadro efetivamente exibido no <img>. Só acompanha `index` depois que o quadro alvo
   // termina de carregar — ver efeito abaixo. Isso é o que evita a tela quebrada/vazia no
@@ -444,6 +491,8 @@ function Spin360Viewer({
   const [displayIndex, setDisplayIndex] = useState(0);
   const [hint, setHint] = useState(true);
   const drag = useRef<{ startX: number; startIndex: number; moved: boolean } | null>(null);
+  const urlRef = useRef(urlAt);
+  urlRef.current = urlAt;
 
   // Em produção os quadros vêm da rede (não do disco local, como em dev), então sem
   // pré-carregar cada arrasto dispara um fetch novo: a imagem trava até chegar e o
@@ -456,8 +505,8 @@ function Spin360Viewer({
     // o lightbox, e cancelar o fetch em andamento só forçava uma nova tentativa depois).
     // Deixar o download seguir em segundo plano é inofensivo — o navegador dedupe pedidos
     // repetidos pra mesma URL e o resultado fica no cache HTTP de qualquer forma.
-    preloadFrames(frames);
-  }, [frames]);
+    preloadFrames(sources);
+  }, [sources]);
 
   // Só troca o quadro exibido depois que ele terminou de carregar de fato (cache hit
   // resolve quase instantâneo; cache miss mantém o quadro anterior na tela em vez de
@@ -473,11 +522,11 @@ function Spin360Viewer({
     img.onerror = () => {
       if (!cancelled) setDisplayIndex(index);
     };
-    img.src = frames[index];
+    img.src = urlRef.current(index);
     return () => {
       cancelled = true;
     };
-  }, [index, frames]);
+  }, [index, sources]);
 
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     e.currentTarget.setPointerCapture(e.pointerId);
@@ -491,8 +540,8 @@ function Spin360Viewer({
     if (!drag.current.moved) return;
     setHint(false);
     const framesPerDrag = Math.round(dx / DRAG_PX_PER_FRAME);
-    let next = (drag.current.startIndex - framesPerDrag) % frames.length;
-    if (next < 0) next += frames.length;
+    let next = (drag.current.startIndex - framesPerDrag) % frameCount;
+    if (next < 0) next += frameCount;
     setIndex(next);
   };
 
@@ -501,7 +550,7 @@ function Spin360Viewer({
     drag.current = null;
   };
 
-  const angle = (displayIndex / frames.length) * 360;
+  const angle = (displayIndex / frameCount) * 360;
 
   return (
     <div
@@ -514,12 +563,42 @@ function Spin360Viewer({
       onPointerLeave={endDrag}
       onPointerCancel={endDrag}
     >
-      <img
-        src={frames[displayIndex]}
-        alt={alt}
-        draggable={false}
-        className="h-full w-full object-contain pointer-events-none"
-      />
+      {sprite ? (
+        // O quadro é uma célula da sheet: `background-size` de cols*100% x rows*100%
+        // faz cada célula ocupar exatamente a caixa, e `background-position` em
+        // porcentagem escolhe qual delas. O wrapper flex + aspect-ratio reproduz o
+        // `object-contain` do <img> — sem ele a célula esticaria e distorceria a moto.
+        <div className="pointer-events-none flex h-full w-full items-center justify-center">
+          <div
+            role="img"
+            aria-label={alt}
+            className="max-h-full max-w-full"
+            style={{
+              width: "100%",
+              aspectRatio: `${sprite.frameW} / ${sprite.frameH}`,
+              backgroundImage: `url(${sprite.sheets[Math.floor(displayIndex / sprite.perSheet)]})`,
+              backgroundSize: `${sprite.cols * 100}% ${sprite.rows * 100}%`,
+              backgroundPosition: `${
+                sprite.cols > 1
+                  ? ((displayIndex % sprite.perSheet) % sprite.cols) / (sprite.cols - 1) * 100
+                  : 0
+              }% ${
+                sprite.rows > 1
+                  ? Math.floor((displayIndex % sprite.perSheet) / sprite.cols) / (sprite.rows - 1) * 100
+                  : 0
+              }%`,
+              backgroundRepeat: "no-repeat",
+            }}
+          />
+        </div>
+      ) : (
+        <img
+          src={frames?.[displayIndex]}
+          alt={alt}
+          draggable={false}
+          className="h-full w-full object-contain pointer-events-none"
+        />
+      )}
       <AngleIndicator angle={angle} position={anglePosition} />
       {hint && (
         <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-4">
@@ -886,9 +965,11 @@ function BikeGallery({
   return (
     <div>
       <div className={`relative aspect-[4/3] overflow-hidden ${STUDIO_BG}`}>
-        {mode === "360" && bike.spin360 ? (
+        {mode === "360" && bike.spinSprite ? (
+          // Card usa os sprites: 3-5 requisições em vez de 19-44, e quadros de 640px
+          // para uma caixa de ~390-435 CSS px. O lightbox é quem carrega a alta.
           <Spin360Viewer
-            frames={bike.spin360}
+            sprite={bike.spinSprite}
             alt={bike.name}
             onTap={() => onExpand("360", 0)}
           />
