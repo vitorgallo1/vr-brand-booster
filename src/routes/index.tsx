@@ -195,7 +195,7 @@ function Hero() {
           <h1 className="mt-6 font-display text-[42px] font-bold leading-[1.02] tracking-tight text-white sm:text-6xl lg:text-[68px]">
             Sua próxima moto
             <br />
-            <span className="text-gradient-brand">começa aqui.</span>
+            <span className="text-primary">começa aqui.</span>
           </h1>
           <p className="mt-6 max-w-lg text-base text-white/75 sm:text-lg">
             Mais de 30 modelos no showroom, oficina certificada e financiamento aprovado em 24h.
@@ -1186,13 +1186,23 @@ function Services() {
       <SectionHeading kicker="Serviços" title="Muito além da venda." className="mb-12 max-w-2xl" />
       <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
         {items.map((s, i) => (
-          <div
-            key={s.t}
-            className="rounded-xl border border-border bg-card p-6 shadow-card transition hover:-translate-y-1 hover:shadow-card-hover"
-          >
-            <p className="font-display text-sm font-bold text-primary">0{i + 1}</p>
-            <h3 className="mt-5 font-display text-lg font-bold text-ink">{s.t}</h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.d}</p>
+          <div key={s.t} className="relative h-full">
+            <div className="relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card p-6 shadow-card transition hover:-translate-y-1 hover:shadow-card-hover">
+              <span
+                aria-hidden
+                className="pointer-events-none absolute -right-3 -top-3 select-none font-display text-7xl font-black leading-none text-primary/10"
+              >
+                0{i + 1}
+              </span>
+              <h3 className="font-display text-lg font-bold text-ink">{s.t}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{s.d}</p>
+            </div>
+            {i < items.length - 1 && (
+              <span
+                aria-hidden
+                className="absolute left-full top-1/2 hidden h-px w-5 -translate-y-1/2 bg-border lg:block"
+              />
+            )}
           </div>
         ))}
       </div>
@@ -1284,7 +1294,7 @@ function Financing() {
           </div>
           <a
             href={WHATSAPP}
-            className="mt-8 inline-flex w-full items-center justify-center gap-3 rounded-full bg-gradient-brand px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-cta transition hover:brightness-105"
+            className="mt-8 inline-flex w-full items-center justify-center gap-3 rounded-full bg-primary px-6 py-3.5 text-sm font-semibold text-primary-foreground shadow-cta transition hover:brightness-105"
           >
             <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-black/15">
               <ArrowRight className="h-4 w-4" aria-hidden />
