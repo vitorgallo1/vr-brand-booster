@@ -6,9 +6,9 @@
 
 /*
  * VR Multimarcas — página de vendas / catálogo.
- * Identidade: paleta oficial do Grupo VR (grupo-vr.com) — preto puro + dourado.
- * Tokens copiados do site institucional: background 0 0% 0%, gold 43 74% 52%.
- * Regra: dourado é reservado para CTA, preço e destaque. Nunca para texto corrido.
+ * Identidade: paleta oficial do Grupo VR (grupo-vr.com) — preto puro + amarelo.
+ * Amarelo customizado: #f0bc04 (hsl 47 97% 48%).
+ * Regra: amarelo é reservado para CTA, preço e destaque. Nunca para texto corrido.
  * Type: Sora (display) + Manrope (texto). Carregadas via <link> em __root.tsx.
  */
 
@@ -48,8 +48,8 @@
 
   /* No preto, sombra não aparece — a "elevação" vem da borda e do brilho dourado */
   --shadow-card: 0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 20px 40px -24px hsl(0 0% 0% / 0.9);
-  --shadow-card-hover: 0 0 0 1px hsl(43 74% 52% / 0.35), 0 30px 60px -30px hsl(43 74% 52% / 0.35);
-  --shadow-cta: 0 10px 30px -10px hsl(43 74% 52% / 0.55);
+  --shadow-card-hover: 0 0 0 1px hsl(47 97% 48% / 0.35), 0 30px 60px -30px hsl(47 97% 48% / 0.35);
+  --shadow-cta: 0 2px 6px hsl(0 0% 0% / 0.35);
 }
 
 :root {
@@ -71,10 +71,10 @@
   --popover: hsl(0 0% 3%);
   --popover-foreground: hsl(0 0% 100%);
 
-  /* Dourado oficial Grupo VR */
-  --primary: hsl(43 74% 52%);
+  /* Amarelo da marca: #f0bc04 */
+  --primary: hsl(47 97% 48%);
   --primary-foreground: hsl(0 0% 0%);
-  --primary-dark: hsl(43 74% 42%);
+  --primary-dark: hsl(47 97% 38%);
 
   --secondary: hsl(0 0% 10%);
   --secondary-foreground: hsl(0 0% 100%);
@@ -82,7 +82,7 @@
   --muted: hsl(0 0% 15%);
   --muted-foreground: hsl(0 0% 65%);
 
-  --accent: hsl(43 74% 52%);
+  --accent: hsl(47 97% 48%);
   --accent-foreground: hsl(0 0% 0%);
 
   --destructive: hsl(0 84.2% 60.2%);
@@ -90,9 +90,8 @@
 
   --border: hsl(0 0% 15%);
   --input: hsl(0 0% 15%);
-  --ring: hsl(43 74% 52%);
+  --ring: hsl(47 97% 48%);
 
-  --gradient-brand: linear-gradient(135deg, hsl(45 80% 62%), hsl(43 74% 45%));
   /* Overlay do hero: escurece a foto o bastante para o texto branco ficar legível */
   --gradient-hero: linear-gradient(
       100deg,
@@ -127,15 +126,6 @@
   }
 }
 
-@utility bg-gradient-brand {
-  background-image: var(--gradient-brand);
-}
-@utility text-gradient-brand {
-  background-image: var(--gradient-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
 @utility bg-gradient-hero {
   background-image: var(--gradient-hero);
 }
