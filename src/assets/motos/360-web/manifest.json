@@ -1,0 +1,66 @@
+{
+  "jef150": {
+    "count": 29,
+    "cols": 3,
+    "rows": 3,
+    "perSheet": 9,
+    "frameW": 640,
+    "frameH": 427
+  },
+  "jet125": {
+    "count": 24,
+    "cols": 3,
+    "rows": 3,
+    "perSheet": 9,
+    "frameW": 640,
+    "frameH": 427
+  },
+  "sbm250s": {
+    "count": 44,
+    "cols": 3,
+    "rows": 3,
+    "perSheet": 9,
+    "frameW": 640,
+    "frameH": 427
+  },
+  "sbm250t": {
+    "count": 22,
+    "cols": 3,
+    "rows": 3,
+    "perSheet": 9,
+    "frameW": 640,
+    "frameH": 427
+  },
+  "sbm600r": {
+    "count": 19,
+    "cols": 3,
+    "rows": 3,
+    "perSheet": 9,
+    "frameW": 640,
+    "frameH": 427
+  },
+  "sbm600v": {
+    "count": 21,
+    "cols": 3,
+    "rows": 3,
+    "perSheet": 9,
+    "frameW": 640,
+    "frameH": 427
+  },
+  "shi175": {
+    "count": 29,
+    "cols": 3,
+    "rows": 3,
+    "perSheet": 9,
+    "frameW": 640,
+    "frameH": 427
+  },
+  "shi400sc": {
+    "count": 24,
+    "cols": 3,
+    "rows": 3,
+    "perSheet": 9,
+    "frameW": 640,
+    "frameH": 427
+  }
+}
