@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import heroWallpaper from "@/assets/wallpaperhero.png";
 import heroBike from "@/assets/hero-bike.jpg";
-import showroom from "@/assets/showroom.jpg";
+// Derivada de src/assets/TKA06941.png (3458px, 8,6 MB) — o slot renderiza a ~600px.
+// Original preservado; regerar com sharp se trocar a foto.
+import fachadaVR from "@/assets/fachada-vr.webp";
 import logoVR from "@/assets/logo-vr.jpg.asset.json";
 import logoVRHorizontal from "@/assets/logohorizontal.png";
 import bancoItau from "@/assets/bancos/itau.svg";
@@ -1210,10 +1212,10 @@ function Experience() {
         <div className="relative order-2 lg:order-1">
           <div className="overflow-hidden rounded-xl border border-border shadow-card">
             <img
-              src={showroom}
-              alt="Showroom VR Multimarcas com iluminação ambiente"
+              src={fachadaVR}
+              alt="Fachada da loja VR Multimarcas, com motos expostas na vitrine"
               width={1600}
-              height={1000}
+              height={1069}
               loading="lazy"
               className="h-full w-full object-cover"
             />
