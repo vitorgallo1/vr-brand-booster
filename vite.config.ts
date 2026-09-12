@@ -12,4 +12,13 @@ export default defineConfig({
     // nitro/vite builds from this
     server: { entry: "server" },
   },
+  // Outside Lovable's own sandbox build, nitro otherwise falls back to its
+  // cloudflare-module default target, which doesn't produce a `dist/client`
+  // directory — mismatching the Netlify site's configured publish directory.
+  nitro: {
+    preset: "netlify",
+    output: {
+      publicDir: "dist/client",
+    },
+  },
 });
