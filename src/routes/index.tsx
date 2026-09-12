@@ -86,7 +86,7 @@ export const Route = createFileRoute("/")({
 });
 
 const WHATSAPP =
-  "https://wa.me/5549991780505?text=Ol%C3%A1!%20Gostaria%20de%20conhecer%20as%20motos%20da%20VR%20Multimarcas.";
+  "https://wa.me/5548988392212?text=Ol%C3%A1!%20Gostaria%20de%20conhecer%20as%20motos%20da%20VR%20Bigua%C3%A7u.";
 
 // Usado pela nav desktop, nav mobile e footer — os 3 lugares que listam as mesmas
 // âncoras da página, cada um com seu próprio estilo de link.
