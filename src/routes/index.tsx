@@ -1406,9 +1406,9 @@ function initials(name: string) {
 
 function Testimonials() {
   const items = [
-    { n: "Rafael M.", c: "Chapecó/SC", t: "Terceira moto que compro na VR. Atendimento honesto, entrega no prazo e a oficina é referência. Recomendo de olhos fechados." },
-    { n: "Camila B.", c: "Passo Fundo/RS", t: "Fui esperando pressão de vendedor e encontrei gente que ouviu. Saí com a moto certa e uma condição que coube no bolso." },
-    { n: "Diego P.", c: "Xanxerê/SC", t: "Comprei uma trail seminova, veio revisada e com documentação em dia. É o padrão que a gente sempre quis num revendedor." },
+    { n: "Rafael M.", c: "Biguaçu/SC", t: "Terceira moto que compro na VR. Atendimento honesto, entrega no prazo e a oficina é referência. Recomendo de olhos fechados." },
+    { n: "Camila B.", c: "Palhoça/SC", t: "Fui esperando pressão de vendedor e encontrei gente que ouviu. Saí com a moto certa e uma condição que coube no bolso." },
+    { n: "Diego P.", c: "São José/SC", t: "Comprei uma trail seminova, veio revisada e com documentação em dia. É o padrão que a gente sempre quis num revendedor." },
   ];
   return (
     <section className="border-y border-border bg-surface">
