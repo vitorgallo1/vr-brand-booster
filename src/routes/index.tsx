@@ -206,7 +206,7 @@ function Hero() {
     <section className="relative isolate overflow-hidden">
       <img
         src={heroWallpaper}
-        alt="Showroom VR Multimarcas"
+        alt="Showroom VR Biguaçu"
         width={1717}
         height={916}
         className="absolute inset-0 -z-10 h-full w-full object-cover"
