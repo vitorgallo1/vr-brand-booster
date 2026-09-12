@@ -302,7 +302,7 @@ type Bike = {
 // O fabricante reajusta preços sem aviso prévio — reconferir periodicamente
 // (por isso também existe o aviso de "sujeito a alteração" na seção Lineup abaixo).
 const wa = (model: string) =>
-  `https://wa.me/5549991780505?text=${encodeURIComponent(
+  `https://wa.me/5548988392212?text=${encodeURIComponent(
     `Olá! Quero uma simulação da ${model}.`,
   )}`;
 
