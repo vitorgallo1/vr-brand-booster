@@ -1213,7 +1213,7 @@ function Experience() {
           <div className="overflow-hidden rounded-xl border border-border shadow-card">
             <img
               src={fachadaVR}
-              alt="Fachada da loja VR Multimarcas, com motos expostas na vitrine"
+              alt="Fachada da loja VR Biguaçu, com motos expostas na vitrine"
               width={1600}
               height={1069}
               loading="lazy"
