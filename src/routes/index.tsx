@@ -86,7 +86,7 @@ export const Route = createFileRoute("/")({
 });
 
 const WHATSAPP =
-  "https://wa.me/5549991780505?text=Ol%C3%A1!%20Gostaria%20de%20conhecer%20as%20motos%20da%20VR%20Multimarcas.";
+  "https://wa.me/5548988392212?text=Ol%C3%A1!%20Gostaria%20de%20conhecer%20as%20motos%20da%20VR%20Bigua%C3%A7u.";
 
 // Usado pela nav desktop, nav mobile e footer — os 3 lugares que listam as mesmas
 // âncoras da página, cada um com seu próprio estilo de link.
@@ -122,11 +122,11 @@ function Logo({ variant = "default" }: { variant?: "default" | "horizontal" }) {
     <a
       href="#top"
       className={isHorizontal ? "flex items-center -ml-4 md:-ml-6" : "flex items-center"}
-      aria-label="VR Multimarcas"
+      aria-label="VR Biguaçu"
     >
       <img
         src={isHorizontal ? logoVRHorizontal : logoVR.url}
-        alt="VR Multimarcas"
+        alt="VR Biguaçu"
         width={isHorizontal ? 262 : 200}
         height={isHorizontal ? 36 : 64}
         className={isHorizontal ? "h-9 w-auto md:h-10" : "h-10 w-auto md:h-11"}
@@ -206,7 +206,7 @@ function Hero() {
     <section className="relative isolate overflow-hidden">
       <img
         src={heroWallpaper}
-        alt="Showroom VR Multimarcas"
+        alt="Showroom VR Biguaçu"
         width={1717}
         height={916}
         className="absolute inset-0 -z-10 h-full w-full object-cover"
@@ -302,7 +302,7 @@ type Bike = {
 // O fabricante reajusta preços sem aviso prévio — reconferir periodicamente
 // (por isso também existe o aviso de "sujeito a alteração" na seção Lineup abaixo).
 const wa = (model: string) =>
-  `https://wa.me/5549991780505?text=${encodeURIComponent(
+  `https://wa.me/5548988392212?text=${encodeURIComponent(
     `Olá! Quero uma simulação da ${model}.`,
   )}`;
 
@@ -1213,7 +1213,7 @@ function Experience() {
           <div className="overflow-hidden rounded-xl border border-border shadow-card">
             <img
               src={fachadaVR}
-              alt="Fachada da loja VR Multimarcas, com motos expostas na vitrine"
+              alt="Fachada da loja VR Biguaçu, com motos expostas na vitrine"
               width={1600}
               height={1069}
               loading="lazy"
@@ -1406,9 +1406,9 @@ function initials(name: string) {
 
 function Testimonials() {
   const items = [
-    { n: "Rafael M.", c: "Chapecó/SC", t: "Terceira moto que compro na VR. Atendimento honesto, entrega no prazo e a oficina é referência. Recomendo de olhos fechados." },
-    { n: "Camila B.", c: "Passo Fundo/RS", t: "Fui esperando pressão de vendedor e encontrei gente que ouviu. Saí com a moto certa e uma condição que coube no bolso." },
-    { n: "Diego P.", c: "Xanxerê/SC", t: "Comprei uma trail seminova, veio revisada e com documentação em dia. É o padrão que a gente sempre quis num revendedor." },
+    { n: "Rafael M.", c: "Biguaçu/SC", t: "Terceira moto que compro na VR. Atendimento honesto, entrega no prazo e a oficina é referência. Recomendo de olhos fechados." },
+    { n: "Camila B.", c: "Palhoça/SC", t: "Fui esperando pressão de vendedor e encontrei gente que ouviu. Saí com a moto certa e uma condição que coube no bolso." },
+    { n: "Diego P.", c: "São José/SC", t: "Comprei uma trail seminova, veio revisada e com documentação em dia. É o padrão que a gente sempre quis num revendedor." },
   ];
   return (
     <section className="border-y border-border bg-surface">
@@ -1472,7 +1472,7 @@ function Visit() {
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Endereço</p>
               <p className="mt-2 text-sm">
-                Av. Getúlio Vargas, 2500<br />Centro — Chapecó / SC
+                Rua Manoel Mariano Ferreira, 160<br />Rio Caveiras — Biguaçu / SC, 88161-372
               </p>
             </div>
             <div>
@@ -1484,7 +1484,7 @@ function Visit() {
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">WhatsApp</p>
               <a href={WHATSAPP} className="mt-2 block text-sm font-semibold text-primary hover:underline">
-                (49) 9 9178-0505
+                (48) 98839-2212
               </a>
             </div>
             <div>
@@ -1496,8 +1496,8 @@ function Visit() {
           </div>
           <div className="mt-8 overflow-hidden rounded-xl border border-border shadow-card">
             <iframe
-              title="Mapa até a VR Multimarcas"
-              src="https://www.google.com/maps?q=Av.+Get%C3%BAlio+Vargas,+2500,+Centro,+Chapec%C3%B3+-+SC&output=embed"
+              title="Mapa até a VR Biguaçu"
+              src="https://www.google.com/maps?q=Rua+Manoel+Mariano+Ferreira,+160,+Rio+Caveiras,+Bigua%C3%A7u+-+SC,+88161-372&output=embed"
               width="100%"
               height="260"
               loading="lazy"
@@ -1523,7 +1523,7 @@ function Visit() {
               <span aria-hidden>→</span>
             </a>
             <a
-              href="tel:+5549991780505"
+              href="tel:+5548988392212"
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-6 py-4 text-sm font-semibold text-ink transition hover:border-primary hover:text-primary"
             >
               Ligar para a loja
@@ -1542,7 +1542,7 @@ function Footer() {
         <div className="flex flex-col gap-3 sm:col-span-2 lg:col-span-1">
           <Logo />
           <p className="max-w-sm text-xs">
-            VR Multimarcas é uma unidade franqueada do Grupo VR, referência em varejo
+            VR Biguaçu é uma unidade franqueada do Grupo VR, referência em varejo
             motociclístico no Brasil.
           </p>
         </div>
@@ -1559,8 +1559,8 @@ function Footer() {
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-ink">Contato</p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
-            <span>Av. Getúlio Vargas, 2500 — Chapecó/SC</span>
-            <a href={WHATSAPP} className="transition hover:text-primary">(49) 9 9178-0505</a>
+            <span>Rua Manoel Mariano Ferreira, 160 — Rio Caveiras, Biguaçu/SC</span>
+            <a href={WHATSAPP} className="transition hover:text-primary">(48) 98839-2212</a>
             <a href="mailto:contato@vrmultimarcas.com.br" className="transition hover:text-primary">
               contato@vrmultimarcas.com.br
             </a>
@@ -1574,10 +1574,10 @@ function Footer() {
           </div>
         </div>
       </div>
-      {/* TODO: incluir CNPJ e razão social reais da VR Multimarcas aqui quando disponíveis. */}
+      {/* TODO: incluir CNPJ e razão social reais da VR Biguaçu aqui quando disponíveis. */}
       <div className="border-t border-border px-5 py-5 lg:px-8">
         <p className="text-[11px] text-muted-foreground/70">
-          © {new Date().getFullYear()} VR Multimarcas. Todos os direitos reservados.
+          © {new Date().getFullYear()} VR Biguaçu. Todos os direitos reservados.
         </p>
       </div>
     </footer>
