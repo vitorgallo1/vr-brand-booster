@@ -1542,7 +1542,7 @@ function Footer() {
         <div className="flex flex-col gap-3 sm:col-span-2 lg:col-span-1">
           <Logo />
           <p className="max-w-sm text-xs">
-            VR Multimarcas é uma unidade franqueada do Grupo VR, referência em varejo
+            VR Biguaçu é uma unidade franqueada do Grupo VR, referência em varejo
             motociclístico no Brasil.
           </p>
         </div>
@@ -1559,8 +1559,8 @@ function Footer() {
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-ink">Contato</p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
-            <span>Av. Getúlio Vargas, 2500 — Chapecó/SC</span>
-            <a href={WHATSAPP} className="transition hover:text-primary">(49) 9 9178-0505</a>
+            <span>Rua Manoel Mariano Ferreira, 160 — Rio Caveiras, Biguaçu/SC</span>
+            <a href={WHATSAPP} className="transition hover:text-primary">(48) 98839-2212</a>
             <a href="mailto:contato@vrmultimarcas.com.br" className="transition hover:text-primary">
               contato@vrmultimarcas.com.br
             </a>
@@ -1574,10 +1574,10 @@ function Footer() {
           </div>
         </div>
       </div>
-      {/* TODO: incluir CNPJ e razão social reais da VR Multimarcas aqui quando disponíveis. */}
+      {/* TODO: incluir CNPJ e razão social reais da VR Biguaçu aqui quando disponíveis. */}
       <div className="border-t border-border px-5 py-5 lg:px-8">
         <p className="text-[11px] text-muted-foreground/70">
-          © {new Date().getFullYear()} VR Multimarcas. Todos os direitos reservados.
+          © {new Date().getFullYear()} VR Biguaçu. Todos os direitos reservados.
         </p>
       </div>
     </footer>
