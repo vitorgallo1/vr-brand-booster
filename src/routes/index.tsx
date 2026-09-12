@@ -1472,7 +1472,7 @@ function Visit() {
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Endereço</p>
               <p className="mt-2 text-sm">
-                Av. Getúlio Vargas, 2500<br />Centro — Chapecó / SC
+                Rua Manoel Mariano Ferreira, 160<br />Rio Caveiras — Biguaçu / SC, 88161-372
               </p>
             </div>
             <div>
@@ -1484,7 +1484,7 @@ function Visit() {
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">WhatsApp</p>
               <a href={WHATSAPP} className="mt-2 block text-sm font-semibold text-primary hover:underline">
-                (49) 9 9178-0505
+                (48) 98839-2212
               </a>
             </div>
             <div>
@@ -1496,8 +1496,8 @@ function Visit() {
           </div>
           <div className="mt-8 overflow-hidden rounded-xl border border-border shadow-card">
             <iframe
-              title="Mapa até a VR Multimarcas"
-              src="https://www.google.com/maps?q=Av.+Get%C3%BAlio+Vargas,+2500,+Centro,+Chapec%C3%B3+-+SC&output=embed"
+              title="Mapa até a VR Biguaçu"
+              src="https://www.google.com/maps?q=Rua+Manoel+Mariano+Ferreira,+160,+Rio+Caveiras,+Bigua%C3%A7u+-+SC,+88161-372&output=embed"
               width="100%"
               height="260"
               loading="lazy"
