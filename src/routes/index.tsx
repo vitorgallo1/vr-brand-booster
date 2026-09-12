@@ -122,11 +122,11 @@ function Logo({ variant = "default" }: { variant?: "default" | "horizontal" }) {
     <a
       href="#top"
       className={isHorizontal ? "flex items-center -ml-4 md:-ml-6" : "flex items-center"}
-      aria-label="VR Multimarcas"
+      aria-label="VR Biguaçu"
     >
       <img
         src={isHorizontal ? logoVRHorizontal : logoVR.url}
-        alt="VR Multimarcas"
+        alt="VR Biguaçu"
         width={isHorizontal ? 262 : 200}
         height={isHorizontal ? 36 : 64}
         className={isHorizontal ? "h-9 w-auto md:h-10" : "h-10 w-auto md:h-11"}
