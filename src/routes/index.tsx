@@ -1523,7 +1523,7 @@ function Visit() {
               <span aria-hidden>→</span>
             </a>
             <a
-              href="tel:+5549991780505"
+              href="tel:+5548988392212"
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-6 py-4 text-sm font-semibold text-ink transition hover:border-primary hover:text-primary"
             >
               Ligar para a loja
