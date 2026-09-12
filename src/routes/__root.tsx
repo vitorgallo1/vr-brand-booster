@@ -77,23 +77,23 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "VR Multimarcas — Motos novas, seminovas e serviço premium" },
+      { title: "VR Biguaçu — Motos novas, seminovas e serviço premium" },
       {
         name: "description",
         content:
-          "Concessionária multimarcas com showroom completo, oficina especializada e condições que cabem no seu bolso. Sinta a experiência VR.",
+          "Concessionária VR Biguaçu com showroom completo, oficina especializada e condições que cabem no seu bolso. Sinta a experiência VR.",
       },
-      { name: "author", content: "VR Multimarcas" },
-      { property: "og:title", content: "VR Multimarcas — Motos novas, seminovas e serviço premium" },
+      { name: "author", content: "VR Biguaçu" },
+      { property: "og:title", content: "VR Biguaçu — Motos novas, seminovas e serviço premium" },
       {
         property: "og:description",
         content:
-          "Concessionária multimarcas com showroom completo, oficina especializada e condições que cabem no seu bolso. Sinta a experiência VR.",
+          "Concessionária VR Biguaçu com showroom completo, oficina especializada e condições que cabem no seu bolso. Sinta a experiência VR.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "VR Multimarcas — Motos novas, seminovas e serviço premium" },
-      { name: "twitter:description", content: "Concessionária multimarcas com showroom completo, oficina especializada e condições que cabem no seu bolso. Sinta a experiência VR." },
+      { name: "twitter:title", content: "VR Biguaçu — Motos novas, seminovas e serviço premium" },
+      { name: "twitter:description", content: "Concessionária VR Biguaçu com showroom completo, oficina especializada e condições que cabem no seu bolso. Sinta a experiência VR." },
       { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44a0306a-51fd-4a2e-9e55-e8a87460bf23/id-preview-e11347a4--476da3c6-79fb-43df-91f5-19dacb0bbc6a.lovable.app-1784215328630.png" },
       { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/44a0306a-51fd-4a2e-9e55-e8a87460bf23/id-preview-e11347a4--476da3c6-79fb-43df-91f5-19dacb0bbc6a.lovable.app-1784215328630.png" },
     ],
