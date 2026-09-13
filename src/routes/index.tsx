@@ -85,8 +85,9 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const WHATSAPP =
-  "https://wa.me/5548988392212?text=Ol%C3%A1!%20Gostaria%20de%20conhecer%20as%20motos%20da%20VR%20Bigua%C3%A7u.";
+const WHATSAPP = `https://wa.me/5548988392212?text=${encodeURIComponent(
+  "Olá! Gostaria de conhecer as motos da VR Multimarcas Biguaçu.",
+)}`;
 
 // Usado pela nav desktop, nav mobile e footer — os 3 lugares que listam as mesmas
 // âncoras da página, cada um com seu próprio estilo de link.
@@ -287,8 +288,6 @@ type Bike = {
   name: string;
   desc: string;
   specs: string[];
-  cash: string;
-  parcel: string;
   badge?: string;
   imgs: string[];
   spin360?: string[];
@@ -298,12 +297,13 @@ type Bike = {
 
 // Modelos e fichas técnicas reais da linha Shineray comercializada no Brasil.
 // Fotos oficiais do fabricante (shineray.com.br), usadas pela revenda multimarcas.
-// Preços "cash"/"parcel" verificados em 31/07/2026 direto no site do fabricante.
-// O fabricante reajusta preços sem aviso prévio — reconferir periodicamente
-// (por isso também existe o aviso de "sujeito a alteração" na seção Lineup abaixo).
+//
+// A vitrine não exibe preço: o fabricante reajusta sem aviso prévio e a condição
+// final depende de entrada, prazo e análise de crédito. No lugar do valor, o card
+// leva direto para a simulação no WhatsApp.
 const wa = (model: string) =>
   `https://wa.me/5548988392212?text=${encodeURIComponent(
-    `Olá! Quero uma simulação da ${model}.`,
+    `Olá! Gostaria de conhecer a ${model} da VR Multimarcas Biguaçu.`,
   )}`;
 
 const BIKES: Bike[] = [
@@ -312,8 +312,6 @@ const BIKES: Bike[] = [
     name: "SHI 175",
     desc: "Trail leve e versátil, pronta para o asfalto e para a estrada de chão. Painel digital, iluminação full LED e partida elétrica com pedal reserva.",
     specs: ["175cc", "Partida elétrica", "Freio a disco duplo"],
-    cash: "R$ 16.490",
-    parcel: "48x de R$ 349",
     badge: "Mais vendida",
     imgs: pickAt(SPIN_360.shi175.frames, [7, 0, 14, 21]),
     spin360: SPIN_360.shi175.frames,
@@ -325,8 +323,6 @@ const BIKES: Bike[] = [
     name: "JET 125",
     desc: "Automática, leve e econômica — ideal para o dia a dia na cidade. Painel 100% digital, porta-objetos e baixo consumo de combustível.",
     specs: ["125cc", "Câmbio automático", "Baixo consumo"],
-    cash: "R$ 11.490",
-    parcel: "48x de R$ 239",
     imgs: pickAt(SPIN_360.jet125.frames, [6, 0, 12, 18]),
     spin360: SPIN_360.jet125.frames,
     spinSprite: SPIN_360.jet125.sprite,
@@ -337,8 +333,6 @@ const BIKES: Bike[] = [
     name: "JEF 150",
     desc: "Naked de entrada com visual moderno, painel 100% digital novo e iluminação full LED. Leve, ágil e com ótimo custo-benefício no dia a dia.",
     specs: ["150cc", "Painel digital", "Freio a disco"],
-    cash: "R$ 14.790",
-    parcel: "48x de R$ 309",
     imgs: pickAt(SPIN_360.jef150.frames, [7, 0, 14, 21]),
     spin360: SPIN_360.jef150.frames,
     spinSprite: SPIN_360.jef150.sprite,
@@ -349,8 +343,6 @@ const BIKES: Bike[] = [
     name: "SBM 250s",
     desc: "Esportiva média com motor DOHC, freios ABS nas duas rodas e painel digital com Bluetooth. Performance de verdade para quem gosta de pilotar.",
     specs: ["250cc DOHC", "ABS duplo canal", "Painel com Bluetooth"],
-    cash: "R$ 23.490",
-    parcel: "48x de R$ 489",
     badge: "Lançamento",
     imgs: pickAt(SPIN_360.sbm250s.frames, [11, 0, 22, 33]),
     spin360: SPIN_360.sbm250s.frames,
@@ -362,8 +354,6 @@ const BIKES: Bike[] = [
     name: "SBM 250t",
     desc: "Big trail com motor DOHC refrigerado a líquido, câmbio de 6 marchas e ABS nas duas rodas. Conforto de viagem com fôlego de sobra para a trilha.",
     specs: ["250cc DOHC", "6 marchas", "ABS duplo canal"],
-    cash: "R$ 24.990",
-    parcel: "48x de R$ 519",
     imgs: pickAt(SPIN_360.sbm250t.frames, [5, 0, 11, 16]),
     spin360: SPIN_360.sbm250t.frames,
     spinSprite: SPIN_360.sbm250t.sprite,
@@ -374,8 +364,6 @@ const BIKES: Bike[] = [
     name: "SHI 400sc",
     desc: "Scrambler de estilo clássico com motor de 400cc, iluminação full LED, USB e sensor de cavalete. Versatilidade para rodovia e cidade.",
     specs: ["400cc", "ABS duplo canal", "Painel TFT"],
-    cash: "R$ 24.990",
-    parcel: "48x de R$ 521",
     imgs: pickAt(SPIN_360.shi400sc.frames, [6, 0, 12, 18]),
     spin360: SPIN_360.shi400sc.frames,
     spinSprite: SPIN_360.shi400sc.sprite,
@@ -386,8 +374,6 @@ const BIKES: Bike[] = [
     name: "SBM 600V",
     desc: "Custom de presença com motor V4 de 600cc, painel TFT com Bluetooth e freio duplo disco com ABS nas duas rodas. Conforto e estilo para rodar em grande estilo.",
     specs: ["600cc V4", "ABS duplo canal", "Painel TFT Bluetooth"],
-    cash: "R$ 51.990",
-    parcel: "48x de R$ 1.089",
     imgs: pickAt(SPIN_360.sbm600v.frames, [0, 5, 10, 15]),
     spin360: SPIN_360.sbm600v.frames,
     spinSprite: SPIN_360.sbm600v.sprite,
@@ -398,8 +384,6 @@ const BIKES: Bike[] = [
     name: "SBM 600R",
     desc: "Esportiva de ponta com motor 4 cilindros e 88,4cv, freios ABS nas duas rodas e painel TFT com espelhamento de tela via aplicativo. O topo de linha da revenda.",
     specs: ["600cc 4 cilindros", "88,4cv", "Painel TFT + app"],
-    cash: "R$ 52.490",
-    parcel: "48x de R$ 1.099",
     badge: "Top de linha",
     imgs: pickAt(SPIN_360.sbm600r.frames, [0, 4, 9, 14]),
     spin360: SPIN_360.sbm600r.frames,
@@ -630,14 +614,17 @@ function BikeSpecs({ specs, className = "" }: { specs: string[]; className?: str
   );
 }
 
-// Bloco "À vista / preço / parcela / CTA" — idêntico no sidebar do lightbox e no
-// card do catálogo, só variando o espaçamento acima do botão.
+// Bloco "valor / CTA" — idêntico no sidebar do lightbox e no card do catálogo,
+// só variando o espaçamento acima do botão. O slot do preço virou chamada para a
+// simulação: mesma hierarquia visual, sem número exposto.
 function BikePriceCTA({ bike, ctaClassName = "mt-5" }: { bike: Bike; ctaClassName?: string }) {
   return (
     <div>
-      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">À vista</p>
-      <p className="font-display text-3xl font-bold leading-none text-ink">{bike.cash}</p>
-      <p className="mt-1.5 text-sm font-semibold text-primary">ou {bike.parcel}</p>
+      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
+        Valor e condições
+      </p>
+      <p className="font-display text-3xl font-bold leading-none text-ink">Consulte aqui</p>
+      <p className="mt-1.5 text-sm font-semibold text-primary">Simulação sem compromisso</p>
       <a
         href={bike.wa}
         className={`${ctaClassName} inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-dark`}
@@ -1136,8 +1123,8 @@ function Lineup() {
           <span aria-hidden>→</span>
         </a>
         <p className="text-center text-xs text-muted-foreground/70">
-          Preços à vista, sujeitos a alteração sem aviso prévio. Consulte condições atualizadas
-          com um consultor VR.
+          Valores e condições sob consulta, sujeitos a análise de crédito e a alteração sem
+          aviso prévio. Fale com um consultor VR para a simulação atualizada.
         </p>
       </div>
 
@@ -1478,7 +1465,7 @@ function Visit() {
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Horário</p>
               <p className="mt-2 text-sm">
-                Seg a Sex — 8h às 19h<br />Sáb — 8h às 13h
+                Seg a Sex — 8h às 20h<br />Sáb — 8h às 14h
               </p>
             </div>
             <div>
@@ -1569,8 +1556,8 @@ function Footer() {
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-ink">Horário</p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
-            <span>Seg a Sex — 8h às 19h</span>
-            <span>Sáb — 8h às 13h</span>
+            <span>Seg a Sex — 8h às 20h</span>
+            <span>Sáb — 8h às 14h</span>
           </div>
         </div>
       </div>
