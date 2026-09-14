@@ -18,7 +18,6 @@ import heroBike from "@/assets/hero-bike.jpg";
 // Derivada de src/assets/TKA06941.png (3458px, 8,6 MB) — o slot renderiza a ~600px.
 // Original preservado; regerar com sharp se trocar a foto.
 import fachadaVR from "@/assets/fachada-vr.webp";
-import logoVR from "@/assets/logo-vr.jpg.asset.json";
 import logoVRHorizontal from "@/assets/logohorizontal.png";
 import bancoItau from "@/assets/bancos/itau.svg";
 import bancoBradesco from "@/assets/bancos/bradesco.svg";
@@ -122,6 +121,15 @@ function Index() {
   );
 }
 
+// Uma arte só para os dois lugares onde a marca aparece (nav e rodapé).
+//
+// Antes o rodapé usava um segundo arquivo (logo-vr.jpg) que não estava no repositório:
+// vinha de src/assets/logo-vr.jpg.asset.json, um ponteiro para o storage do Lovable
+// (/__l5e/assets-v1/...). Esse caminho só resolve dentro do preview do Lovable e dava
+// 404 em produção — o rodapé ficava com a imagem quebrada.
+//
+// A variante "horizontal" (nav) recebe um recuo negativo à esquerda para o monograma
+// encostar na margem; no rodapé o logo alinha com o parágrafo abaixo dele, então não leva.
 function Logo({ variant = "default" }: { variant?: "default" | "horizontal" }) {
   const isHorizontal = variant === "horizontal";
   return (
@@ -131,11 +139,15 @@ function Logo({ variant = "default" }: { variant?: "default" | "horizontal" }) {
       aria-label="VR Biguaçu"
     >
       <img
-        src={isHorizontal ? logoVRHorizontal : logoVR.url}
+        src={logoVRHorizontal}
         alt="VR Biguaçu"
-        width={isHorizontal ? 262 : 200}
-        height={isHorizontal ? 36 : 64}
-        className={isHorizontal ? "h-9 w-auto md:h-10" : "h-10 w-auto md:h-11"}
+        width={262}
+        height={36}
+        className={
+          isHorizontal
+            ? "h-9 w-auto max-w-full object-contain md:h-10"
+            : "h-8 w-auto max-w-full object-contain md:h-9"
+        }
       />
     </a>
   );
