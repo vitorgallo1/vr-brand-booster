@@ -26,6 +26,11 @@ import bancoSantander from "@/assets/bancos/santander.svg";
 import bancoBB from "@/assets/bancos/bb.svg";
 import bancoSicredi from "@/assets/bancos/sicredi.svg";
 import bancoCaixa from "@/assets/bancos/caixa.svg";
+// PNG e não SVG: são os arquivos que a loja forneceu. Recortados no limite da arte e
+// exportados a 96px de altura (4x do tamanho de exibição), fundo branco — igual ao do
+// quadrinho que os envolve, então some.
+import bancoPorto from "@/assets/bancos/portobank.png";
+import bancoPan from "@/assets/bancos/pan.png";
 import spinManifest from "@/assets/motos/360-web/manifest.json";
 
 // Todas as fotos das motos vêm da sequência de giro 360° do fabricante
@@ -1287,13 +1292,17 @@ const FINANCING_STATS = [
   { icon: Percent, k: "0%", v: "De burocracia" },
 ];
 
-const BANK_PARTNERS = [
+// `size` é ajuste ótico: a arte do Banco PAN tem a marca pequena dentro do próprio
+// quadro, então na altura padrão ela lê menor que as vizinhas.
+const BANK_PARTNERS: { name: string; logo: string; size?: string }[] = [
   { name: "Itaú", logo: bancoItau },
   { name: "Bradesco", logo: bancoBradesco },
   { name: "Santander", logo: bancoSantander },
   { name: "Banco do Brasil", logo: bancoBB },
   { name: "Sicredi", logo: bancoSicredi },
   { name: "Caixa", logo: bancoCaixa },
+  { name: "PortoBank", logo: bancoPorto },
+  { name: "Banco PAN", logo: bancoPan, size: "h-6 sm:h-7" },
 ];
 
 function Financing() {
@@ -1327,14 +1336,19 @@ function Financing() {
               Financeiras parceiras
             </p>
             <div className="mt-3 rounded-xl border border-primary/25 bg-background/70 p-4 backdrop-blur-sm shadow-card">
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                 {BANK_PARTNERS.map((b) => (
                   <span
                     key={b.name}
-                    className="flex h-11 items-center justify-center rounded-lg bg-white px-3.5 shadow-sm"
+                    className="flex h-11 items-center justify-center rounded-lg bg-white px-3 shadow-sm"
                     title={b.name}
                   >
-                    <img src={b.logo} alt={b.name} className="h-5 w-auto object-contain sm:h-6" />
+                    <img
+                      src={b.logo}
+                      alt={b.name}
+                      loading="lazy"
+                      className={`w-auto max-w-full object-contain ${b.size ?? "h-5 sm:h-6"}`}
+                    />
                   </span>
                 ))}
               </div>
@@ -1465,7 +1479,7 @@ function Visit() {
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Horário</p>
               <p className="mt-2 text-sm">
-                Seg a Sex — 8h às 20h<br />Sáb — 8h às 14h
+                Seg a Sáb — 8h às 20h<br />Domingo — fechado
               </p>
             </div>
             <div>
@@ -1556,8 +1570,8 @@ function Footer() {
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-ink">Horário</p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
-            <span>Seg a Sex — 8h às 20h</span>
-            <span>Sáb — 8h às 14h</span>
+            <span>Seg a Sáb — 8h às 20h</span>
+            <span>Domingo — fechado</span>
           </div>
         </div>
       </div>
