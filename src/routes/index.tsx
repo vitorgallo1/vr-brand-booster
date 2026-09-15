@@ -30,6 +30,17 @@ import bancoCaixa from "@/assets/bancos/caixa.svg";
 // quadrinho que os envolve, então some.
 import bancoPorto from "@/assets/bancos/portobank.png";
 import bancoPan from "@/assets/bancos/pan.png";
+// Marcas do showroom. Recortadas da arte única que a loja mandou, com o fundo preto
+// convertido em transparência para assentarem em qualquer tom escuro do tema.
+import marcaAvelloz from "@/assets/marcas/avelloz.png";
+import marcaBull from "@/assets/marcas/bull.png";
+import marcaHaojue from "@/assets/marcas/haojue.png";
+import marcaHonda from "@/assets/marcas/honda.png";
+import marcaSbm from "@/assets/marcas/sbm.png";
+import marcaShineray from "@/assets/marcas/shineray.png";
+import marcaSuzuki from "@/assets/marcas/suzuki.png";
+import marcaYamaha from "@/assets/marcas/yamaha.png";
+import marcaZontes from "@/assets/marcas/zontes.png";
 import spinManifest from "@/assets/motos/360-web/manifest.json";
 
 // Todas as fotos das motos vêm da sequência de giro 360° do fabricante
@@ -1059,6 +1070,48 @@ function BikeGallery({
   );
 }
 
+// Ordem alfabética: nenhuma marca ganha destaque sobre as outras.
+// `size` é ajuste ótico — Bull e Zontes têm um símbolo alto junto do nome, então na
+// altura padrão o nome sai menor que o das vizinhas.
+const SHOWROOM_BRANDS: { name: string; logo: string; size?: string }[] = [
+  { name: "Avelloz", logo: marcaAvelloz },
+  { name: "Bull", logo: marcaBull, size: "h-6 sm:h-7" },
+  { name: "Haojue", logo: marcaHaojue },
+  { name: "Honda", logo: marcaHonda },
+  { name: "SBM", logo: marcaSbm },
+  { name: "Shineray", logo: marcaShineray },
+  { name: "Suzuki", logo: marcaSuzuki },
+  { name: "Yamaha", logo: marcaYamaha },
+  { name: "Zontes", logo: marcaZontes, size: "h-7 sm:h-8" },
+];
+
+// Faixa de marcas logo abaixo do cabeçalho do catálogo: o catálogo mostra a linha em
+// destaque, e esta faixa responde a pergunta que todo visitante de multimarcas faz antes
+// de rolar ("vocês têm Honda? Yamaha?").
+function ShowroomBrands() {
+  return (
+    <div className="mt-10 rounded-xl border border-border bg-surface/60 px-5 py-5 sm:px-7 sm:py-6">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        Marcas que você encontra no showroom
+      </p>
+      <ul className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-5 sm:gap-x-11">
+        {SHOWROOM_BRANDS.map((m) => (
+          <li key={m.name}>
+            <img
+              src={m.logo}
+              alt={m.name}
+              loading="lazy"
+              className={`w-auto max-w-full object-contain opacity-80 transition hover:opacity-100 ${
+                m.size ?? "h-5 sm:h-6"
+              }`}
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function Lineup() {
   const categories = useMemo(
     () => ["Todas", ...Array.from(new Set(BIKES.map((b) => b.tag)))],
@@ -1088,6 +1141,8 @@ function Lineup() {
           revisão inclusa.
         </p>
       </header>
+
+      <ShowroomBrands />
 
       <div className="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filtrar por categoria">
         {categories.map((c) => (
@@ -1421,7 +1476,8 @@ function Testimonials() {
   const items = [
     { n: "Rafael M.", c: "Biguaçu/SC", t: "Terceira moto que compro na VR. Atendimento honesto, entrega no prazo e a oficina é referência. Recomendo de olhos fechados." },
     { n: "Camila B.", c: "Palhoça/SC", t: "Fui esperando pressão de vendedor e encontrei gente que ouviu. Saí com a moto certa e uma condição que coube no bolso." },
-    { n: "Diego P.", c: "São José/SC", t: "Comprei uma trail seminova, veio revisada e com documentação em dia. É o padrão que a gente sempre quis num revendedor." },
+    { n: "Diego P.", c: "São José/SC", t: "Comprei uma trail, veio revisada e com documentação em dia. É o padrão que a gente sempre quis num revendedor." },
+    { n: "Jeferson", c: "Florianópolis/SC", t: "Comprei uma moto 0km. Excelente atendimento e entrega." },
   ];
   return (
     <section className="border-y border-border bg-surface">
@@ -1431,7 +1487,7 @@ function Testimonials() {
           title="Confiança que se conta em quilômetros."
           className="mb-12 max-w-2xl"
         />
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((r) => (
             <figure
               key={r.n}
@@ -1498,12 +1554,6 @@ function Visit() {
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">WhatsApp</p>
               <a href={WHATSAPP} className="mt-2 block text-sm font-semibold text-primary hover:underline">
                 (48) 98839-2212
-              </a>
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">E-mail</p>
-              <a href="mailto:contato@vrmultimarcas.com.br" className="mt-2 block text-sm font-semibold text-primary hover:underline">
-                contato@vrmultimarcas.com.br
               </a>
             </div>
           </div>
@@ -1574,9 +1624,6 @@ function Footer() {
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
             <span>Rua Manoel Mariano Ferreira, 160 — Rio Caveiras, Biguaçu/SC</span>
             <a href={WHATSAPP} className="transition hover:text-primary">(48) 98839-2212</a>
-            <a href="mailto:contato@vrmultimarcas.com.br" className="transition hover:text-primary">
-              contato@vrmultimarcas.com.br
-            </a>
           </div>
         </div>
         <div>
