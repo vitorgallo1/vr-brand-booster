@@ -100,7 +100,7 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const WHATSAPP = `https://wa.me/5548988392212?text=${encodeURIComponent(
+const WHATSAPP = `https://wa.me/5548991788090?text=${encodeURIComponent(
   "Olá! Gostaria de conhecer as motos da VR Multimarcas Biguaçu.",
 )}`;
 
@@ -1553,7 +1553,7 @@ function Visit() {
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">WhatsApp</p>
               <a href={WHATSAPP} className="mt-2 block text-sm font-semibold text-primary hover:underline">
-                (48) 98839-2212
+                (48) 99178-8090
               </a>
             </div>
           </div>
@@ -1623,7 +1623,7 @@ function Footer() {
           <p className="text-[11px] font-semibold uppercase tracking-widest text-ink">Contato</p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
             <span>Rua Manoel Mariano Ferreira, 160 — Rio Caveiras, Biguaçu/SC</span>
-            <a href={WHATSAPP} className="transition hover:text-primary">(48) 98839-2212</a>
+            <a href={WHATSAPP} className="transition hover:text-primary">(48) 99178-8090</a>
           </div>
         </div>
         <div>
