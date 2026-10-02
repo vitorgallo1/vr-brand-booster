@@ -330,7 +330,7 @@ type Bike = {
 // final depende de entrada, prazo e análise de crédito. No lugar do valor, o card
 // leva direto para a simulação no WhatsApp.
 const wa = (model: string) =>
-  `https://wa.me/5548988392212?text=${encodeURIComponent(
+  `https://wa.me/5548991788090?text=${encodeURIComponent(
     `Olá! Gostaria de conhecer a ${model} da VR Multimarcas Biguaçu.`,
   )}`;
 
@@ -1586,7 +1586,7 @@ function Visit() {
               <span aria-hidden>→</span>
             </a>
             <a
-              href="tel:+5548988392212"
+              href="tel:+5548991788090"
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-6 py-4 text-sm font-semibold text-ink transition hover:border-primary hover:text-primary"
             >
               Ligar para a loja
