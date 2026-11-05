@@ -18,7 +18,6 @@ import heroBike from "@/assets/hero-bike.jpg";
 // Derivada de src/assets/TKA06941.png (3458px, 8,6 MB) — o slot renderiza a ~600px.
 // Original preservado; regerar com sharp se trocar a foto.
 import fachadaVR from "@/assets/fachada-vr.webp";
-import logoVR from "@/assets/logo-vr.jpg.asset.json";
 import logoVRHorizontal from "@/assets/logohorizontal.png";
 import bancoItau from "@/assets/bancos/itau.svg";
 import bancoBradesco from "@/assets/bancos/bradesco.svg";
@@ -26,6 +25,22 @@ import bancoSantander from "@/assets/bancos/santander.svg";
 import bancoBB from "@/assets/bancos/bb.svg";
 import bancoSicredi from "@/assets/bancos/sicredi.svg";
 import bancoCaixa from "@/assets/bancos/caixa.svg";
+// PNG e não SVG: são os arquivos que a loja forneceu. Recortados no limite da arte e
+// exportados a 96px de altura (4x do tamanho de exibição), fundo branco — igual ao do
+// quadrinho que os envolve, então some.
+import bancoPorto from "@/assets/bancos/portobank.png";
+import bancoPan from "@/assets/bancos/pan.png";
+// Marcas do showroom. Recortadas da arte única que a loja mandou, com o fundo preto
+// convertido em transparência para assentarem em qualquer tom escuro do tema.
+import marcaAvelloz from "@/assets/marcas/avelloz.png";
+import marcaBull from "@/assets/marcas/bull.png";
+import marcaHaojue from "@/assets/marcas/haojue.png";
+import marcaHonda from "@/assets/marcas/honda.png";
+import marcaSbm from "@/assets/marcas/sbm.png";
+import marcaShineray from "@/assets/marcas/shineray.png";
+import marcaSuzuki from "@/assets/marcas/suzuki.png";
+import marcaYamaha from "@/assets/marcas/yamaha.png";
+import marcaZontes from "@/assets/marcas/zontes.png";
 import spinManifest from "@/assets/motos/360-web/manifest.json";
 
 // Todas as fotos das motos vêm da sequência de giro 360° do fabricante
@@ -85,8 +100,9 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-const WHATSAPP =
-  "https://wa.me/5548988392212?text=Ol%C3%A1!%20Gostaria%20de%20conhecer%20as%20motos%20da%20VR%20Bigua%C3%A7u.";
+const WHATSAPP = `https://wa.me/5548991788090?text=${encodeURIComponent(
+  "Olá! Gostaria de conhecer as motos da VR Multimarcas Biguaçu.",
+)}`;
 
 // Usado pela nav desktop, nav mobile e footer — os 3 lugares que listam as mesmas
 // âncoras da página, cada um com seu próprio estilo de link.
@@ -116,6 +132,15 @@ function Index() {
   );
 }
 
+// Uma arte só para os dois lugares onde a marca aparece (nav e rodapé).
+//
+// Antes o rodapé usava um segundo arquivo (logo-vr.jpg) que não estava no repositório:
+// vinha de src/assets/logo-vr.jpg.asset.json, um ponteiro para o storage do Lovable
+// (/__l5e/assets-v1/...). Esse caminho só resolve dentro do preview do Lovable e dava
+// 404 em produção — o rodapé ficava com a imagem quebrada.
+//
+// A variante "horizontal" (nav) recebe um recuo negativo à esquerda para o monograma
+// encostar na margem; no rodapé o logo alinha com o parágrafo abaixo dele, então não leva.
 function Logo({ variant = "default" }: { variant?: "default" | "horizontal" }) {
   const isHorizontal = variant === "horizontal";
   return (
@@ -125,11 +150,15 @@ function Logo({ variant = "default" }: { variant?: "default" | "horizontal" }) {
       aria-label="VR Biguaçu"
     >
       <img
-        src={isHorizontal ? logoVRHorizontal : logoVR.url}
+        src={logoVRHorizontal}
         alt="VR Biguaçu"
-        width={isHorizontal ? 262 : 200}
-        height={isHorizontal ? 36 : 64}
-        className={isHorizontal ? "h-9 w-auto md:h-10" : "h-10 w-auto md:h-11"}
+        width={262}
+        height={36}
+        className={
+          isHorizontal
+            ? "h-9 w-auto max-w-full object-contain md:h-10"
+            : "h-8 w-auto max-w-full object-contain md:h-9"
+        }
       />
     </a>
   );
@@ -287,8 +316,6 @@ type Bike = {
   name: string;
   desc: string;
   specs: string[];
-  cash: string;
-  parcel: string;
   badge?: string;
   imgs: string[];
   spin360?: string[];
@@ -298,12 +325,13 @@ type Bike = {
 
 // Modelos e fichas técnicas reais da linha Shineray comercializada no Brasil.
 // Fotos oficiais do fabricante (shineray.com.br), usadas pela revenda multimarcas.
-// Preços "cash"/"parcel" verificados em 31/07/2026 direto no site do fabricante.
-// O fabricante reajusta preços sem aviso prévio — reconferir periodicamente
-// (por isso também existe o aviso de "sujeito a alteração" na seção Lineup abaixo).
+//
+// A vitrine não exibe preço: o fabricante reajusta sem aviso prévio e a condição
+// final depende de entrada, prazo e análise de crédito. No lugar do valor, o card
+// leva direto para a simulação no WhatsApp.
 const wa = (model: string) =>
-  `https://wa.me/5548988392212?text=${encodeURIComponent(
-    `Olá! Quero uma simulação da ${model}.`,
+  `https://wa.me/5548991788090?text=${encodeURIComponent(
+    `Olá! Gostaria de conhecer a ${model} da VR Multimarcas Biguaçu.`,
   )}`;
 
 const BIKES: Bike[] = [
@@ -312,8 +340,6 @@ const BIKES: Bike[] = [
     name: "SHI 175",
     desc: "Trail leve e versátil, pronta para o asfalto e para a estrada de chão. Painel digital, iluminação full LED e partida elétrica com pedal reserva.",
     specs: ["175cc", "Partida elétrica", "Freio a disco duplo"],
-    cash: "R$ 16.490",
-    parcel: "48x de R$ 349",
     badge: "Mais vendida",
     imgs: pickAt(SPIN_360.shi175.frames, [7, 0, 14, 21]),
     spin360: SPIN_360.shi175.frames,
@@ -325,8 +351,6 @@ const BIKES: Bike[] = [
     name: "JET 125",
     desc: "Automática, leve e econômica — ideal para o dia a dia na cidade. Painel 100% digital, porta-objetos e baixo consumo de combustível.",
     specs: ["125cc", "Câmbio automático", "Baixo consumo"],
-    cash: "R$ 11.490",
-    parcel: "48x de R$ 239",
     imgs: pickAt(SPIN_360.jet125.frames, [6, 0, 12, 18]),
     spin360: SPIN_360.jet125.frames,
     spinSprite: SPIN_360.jet125.sprite,
@@ -337,8 +361,6 @@ const BIKES: Bike[] = [
     name: "JEF 150",
     desc: "Naked de entrada com visual moderno, painel 100% digital novo e iluminação full LED. Leve, ágil e com ótimo custo-benefício no dia a dia.",
     specs: ["150cc", "Painel digital", "Freio a disco"],
-    cash: "R$ 14.790",
-    parcel: "48x de R$ 309",
     imgs: pickAt(SPIN_360.jef150.frames, [7, 0, 14, 21]),
     spin360: SPIN_360.jef150.frames,
     spinSprite: SPIN_360.jef150.sprite,
@@ -349,8 +371,6 @@ const BIKES: Bike[] = [
     name: "SBM 250s",
     desc: "Esportiva média com motor DOHC, freios ABS nas duas rodas e painel digital com Bluetooth. Performance de verdade para quem gosta de pilotar.",
     specs: ["250cc DOHC", "ABS duplo canal", "Painel com Bluetooth"],
-    cash: "R$ 23.490",
-    parcel: "48x de R$ 489",
     badge: "Lançamento",
     imgs: pickAt(SPIN_360.sbm250s.frames, [11, 0, 22, 33]),
     spin360: SPIN_360.sbm250s.frames,
@@ -362,8 +382,6 @@ const BIKES: Bike[] = [
     name: "SBM 250t",
     desc: "Big trail com motor DOHC refrigerado a líquido, câmbio de 6 marchas e ABS nas duas rodas. Conforto de viagem com fôlego de sobra para a trilha.",
     specs: ["250cc DOHC", "6 marchas", "ABS duplo canal"],
-    cash: "R$ 24.990",
-    parcel: "48x de R$ 519",
     imgs: pickAt(SPIN_360.sbm250t.frames, [5, 0, 11, 16]),
     spin360: SPIN_360.sbm250t.frames,
     spinSprite: SPIN_360.sbm250t.sprite,
@@ -374,8 +392,6 @@ const BIKES: Bike[] = [
     name: "SHI 400sc",
     desc: "Scrambler de estilo clássico com motor de 400cc, iluminação full LED, USB e sensor de cavalete. Versatilidade para rodovia e cidade.",
     specs: ["400cc", "ABS duplo canal", "Painel TFT"],
-    cash: "R$ 24.990",
-    parcel: "48x de R$ 521",
     imgs: pickAt(SPIN_360.shi400sc.frames, [6, 0, 12, 18]),
     spin360: SPIN_360.shi400sc.frames,
     spinSprite: SPIN_360.shi400sc.sprite,
@@ -386,8 +402,6 @@ const BIKES: Bike[] = [
     name: "SBM 600V",
     desc: "Custom de presença com motor V4 de 600cc, painel TFT com Bluetooth e freio duplo disco com ABS nas duas rodas. Conforto e estilo para rodar em grande estilo.",
     specs: ["600cc V4", "ABS duplo canal", "Painel TFT Bluetooth"],
-    cash: "R$ 51.990",
-    parcel: "48x de R$ 1.089",
     imgs: pickAt(SPIN_360.sbm600v.frames, [0, 5, 10, 15]),
     spin360: SPIN_360.sbm600v.frames,
     spinSprite: SPIN_360.sbm600v.sprite,
@@ -398,8 +412,6 @@ const BIKES: Bike[] = [
     name: "SBM 600R",
     desc: "Esportiva de ponta com motor 4 cilindros e 88,4cv, freios ABS nas duas rodas e painel TFT com espelhamento de tela via aplicativo. O topo de linha da revenda.",
     specs: ["600cc 4 cilindros", "88,4cv", "Painel TFT + app"],
-    cash: "R$ 52.490",
-    parcel: "48x de R$ 1.099",
     badge: "Top de linha",
     imgs: pickAt(SPIN_360.sbm600r.frames, [0, 4, 9, 14]),
     spin360: SPIN_360.sbm600r.frames,
@@ -630,14 +642,17 @@ function BikeSpecs({ specs, className = "" }: { specs: string[]; className?: str
   );
 }
 
-// Bloco "À vista / preço / parcela / CTA" — idêntico no sidebar do lightbox e no
-// card do catálogo, só variando o espaçamento acima do botão.
+// Bloco "valor / CTA" — idêntico no sidebar do lightbox e no card do catálogo,
+// só variando o espaçamento acima do botão. O slot do preço virou chamada para a
+// simulação: mesma hierarquia visual, sem número exposto.
 function BikePriceCTA({ bike, ctaClassName = "mt-5" }: { bike: Bike; ctaClassName?: string }) {
   return (
     <div>
-      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">À vista</p>
-      <p className="font-display text-3xl font-bold leading-none text-ink">{bike.cash}</p>
-      <p className="mt-1.5 text-sm font-semibold text-primary">ou {bike.parcel}</p>
+      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
+        Valor e condições
+      </p>
+      <p className="font-display text-3xl font-bold leading-none text-ink">Consulte aqui</p>
+      <p className="mt-1.5 text-sm font-semibold text-primary">Simulação sem compromisso</p>
       <a
         href={bike.wa}
         className={`${ctaClassName} inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-dark`}
@@ -1055,6 +1070,48 @@ function BikeGallery({
   );
 }
 
+// Ordem alfabética: nenhuma marca ganha destaque sobre as outras.
+// `size` é ajuste ótico — Bull e Zontes têm um símbolo alto junto do nome, então na
+// altura padrão o nome sai menor que o das vizinhas.
+const SHOWROOM_BRANDS: { name: string; logo: string; size?: string }[] = [
+  { name: "Avelloz", logo: marcaAvelloz },
+  { name: "Bull", logo: marcaBull, size: "h-6 sm:h-7" },
+  { name: "Haojue", logo: marcaHaojue },
+  { name: "Honda", logo: marcaHonda },
+  { name: "SBM", logo: marcaSbm },
+  { name: "Shineray", logo: marcaShineray },
+  { name: "Suzuki", logo: marcaSuzuki },
+  { name: "Yamaha", logo: marcaYamaha },
+  { name: "Zontes", logo: marcaZontes, size: "h-7 sm:h-8" },
+];
+
+// Faixa de marcas logo abaixo do cabeçalho do catálogo: o catálogo mostra a linha em
+// destaque, e esta faixa responde a pergunta que todo visitante de multimarcas faz antes
+// de rolar ("vocês têm Honda? Yamaha?").
+function ShowroomBrands() {
+  return (
+    <div className="mt-10 rounded-xl border border-border bg-surface/60 px-5 py-5 sm:px-7 sm:py-6">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
+        Marcas que você encontra no showroom
+      </p>
+      <ul className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-5 sm:gap-x-11">
+        {SHOWROOM_BRANDS.map((m) => (
+          <li key={m.name}>
+            <img
+              src={m.logo}
+              alt={m.name}
+              loading="lazy"
+              className={`w-auto max-w-full object-contain opacity-80 transition hover:opacity-100 ${
+                m.size ?? "h-5 sm:h-6"
+              }`}
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
 function Lineup() {
   const categories = useMemo(
     () => ["Todas", ...Array.from(new Set(BIKES.map((b) => b.tag)))],
@@ -1084,6 +1141,8 @@ function Lineup() {
           revisão inclusa.
         </p>
       </header>
+
+      <ShowroomBrands />
 
       <div className="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filtrar por categoria">
         {categories.map((c) => (
@@ -1136,8 +1195,8 @@ function Lineup() {
           <span aria-hidden>→</span>
         </a>
         <p className="text-center text-xs text-muted-foreground/70">
-          Preços à vista, sujeitos a alteração sem aviso prévio. Consulte condições atualizadas
-          com um consultor VR.
+          Valores e condições sob consulta, sujeitos a análise de crédito e a alteração sem
+          aviso prévio. Fale com um consultor VR para a simulação atualizada.
         </p>
       </div>
 
@@ -1300,13 +1359,17 @@ const FINANCING_STATS = [
   { icon: Percent, k: "0%", v: "De burocracia" },
 ];
 
-const BANK_PARTNERS = [
+// `size` é ajuste ótico: a arte do Banco PAN tem a marca pequena dentro do próprio
+// quadro, então na altura padrão ela lê menor que as vizinhas.
+const BANK_PARTNERS: { name: string; logo: string; size?: string }[] = [
   { name: "Itaú", logo: bancoItau },
   { name: "Bradesco", logo: bancoBradesco },
   { name: "Santander", logo: bancoSantander },
   { name: "Banco do Brasil", logo: bancoBB },
   { name: "Sicredi", logo: bancoSicredi },
   { name: "Caixa", logo: bancoCaixa },
+  { name: "PortoBank", logo: bancoPorto },
+  { name: "Banco PAN", logo: bancoPan, size: "h-6 sm:h-7" },
 ];
 
 function Financing() {
@@ -1340,14 +1403,19 @@ function Financing() {
               Financeiras parceiras
             </p>
             <div className="mt-3 rounded-xl border border-primary/25 bg-background/70 p-4 backdrop-blur-sm shadow-card">
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-2 gap-2.5 sm:grid-cols-4">
                 {BANK_PARTNERS.map((b) => (
                   <span
                     key={b.name}
-                    className="flex h-11 items-center justify-center rounded-lg bg-white px-3.5 shadow-sm"
+                    className="flex h-11 items-center justify-center rounded-lg bg-white px-3 shadow-sm"
                     title={b.name}
                   >
-                    <img src={b.logo} alt={b.name} className="h-5 w-auto object-contain sm:h-6" />
+                    <img
+                      src={b.logo}
+                      alt={b.name}
+                      loading="lazy"
+                      className={`w-auto max-w-full object-contain ${b.size ?? "h-5 sm:h-6"}`}
+                    />
                   </span>
                 ))}
               </div>
@@ -1408,7 +1476,8 @@ function Testimonials() {
   const items = [
     { n: "Rafael M.", c: "Biguaçu/SC", t: "Terceira moto que compro na VR. Atendimento honesto, entrega no prazo e a oficina é referência. Recomendo de olhos fechados." },
     { n: "Camila B.", c: "Palhoça/SC", t: "Fui esperando pressão de vendedor e encontrei gente que ouviu. Saí com a moto certa e uma condição que coube no bolso." },
-    { n: "Diego P.", c: "São José/SC", t: "Comprei uma trail seminova, veio revisada e com documentação em dia. É o padrão que a gente sempre quis num revendedor." },
+    { n: "Diego P.", c: "São José/SC", t: "Comprei uma trail, veio revisada e com documentação em dia. É o padrão que a gente sempre quis num revendedor." },
+    { n: "Jeferson", c: "Florianópolis/SC", t: "Comprei uma moto 0km. Excelente atendimento e entrega." },
   ];
   return (
     <section className="border-y border-border bg-surface">
@@ -1418,7 +1487,7 @@ function Testimonials() {
           title="Confiança que se conta em quilômetros."
           className="mb-12 max-w-2xl"
         />
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {items.map((r) => (
             <figure
               key={r.n}
@@ -1478,19 +1547,13 @@ function Visit() {
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Horário</p>
               <p className="mt-2 text-sm">
-                Seg a Sex — 8h às 19h<br />Sáb — 8h às 13h
+                Seg a Sáb — 8h às 20h<br />Domingo — fechado
               </p>
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">WhatsApp</p>
               <a href={WHATSAPP} className="mt-2 block text-sm font-semibold text-primary hover:underline">
-                (48) 98839-2212
-              </a>
-            </div>
-            <div>
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">E-mail</p>
-              <a href="mailto:contato@vrmultimarcas.com.br" className="mt-2 block text-sm font-semibold text-primary hover:underline">
-                contato@vrmultimarcas.com.br
+                (48) 99178-8090
               </a>
             </div>
           </div>
@@ -1523,7 +1586,7 @@ function Visit() {
               <span aria-hidden>→</span>
             </a>
             <a
-              href="tel:+5548988392212"
+              href="tel:+5548991788090"
               className="inline-flex items-center justify-center gap-2 rounded-lg border border-border px-6 py-4 text-sm font-semibold text-ink transition hover:border-primary hover:text-primary"
             >
               Ligar para a loja
@@ -1560,17 +1623,14 @@ function Footer() {
           <p className="text-[11px] font-semibold uppercase tracking-widest text-ink">Contato</p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
             <span>Rua Manoel Mariano Ferreira, 160 — Rio Caveiras, Biguaçu/SC</span>
-            <a href={WHATSAPP} className="transition hover:text-primary">(48) 98839-2212</a>
-            <a href="mailto:contato@vrmultimarcas.com.br" className="transition hover:text-primary">
-              contato@vrmultimarcas.com.br
-            </a>
+            <a href={WHATSAPP} className="transition hover:text-primary">(48) 99178-8090</a>
           </div>
         </div>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-ink">Horário</p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
-            <span>Seg a Sex — 8h às 19h</span>
-            <span>Sáb — 8h às 13h</span>
+            <span>Seg a Sáb — 8h às 20h</span>
+            <span>Domingo — fechado</span>
           </div>
         </div>
       </div>
