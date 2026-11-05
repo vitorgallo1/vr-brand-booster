@@ -1208,7 +1208,11 @@ function BikeGallery({
               width={1200}
               height={900}
               loading="lazy"
-              className="h-full w-full scale-125 object-contain p-4 transition duration-500 group-hover:scale-[1.32]"
+              // Recortes do giro 360° têm muita margem transparente, por isso o zoom extra;
+              // as fotos do catálogo já vêm enquadradas e seriam cortadas.
+              className={`h-full w-full object-contain transition duration-500 ${
+                has360 ? "scale-125 p-4 group-hover:scale-[1.32]" : "group-hover:scale-105"
+              }`}
             />
           </button>
         )}
