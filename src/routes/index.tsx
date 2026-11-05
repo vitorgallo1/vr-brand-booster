@@ -15,8 +15,7 @@ import {
 } from "lucide-react";
 import heroWallpaper from "@/assets/wallpaperhero.png";
 import heroBike from "@/assets/hero-bike.jpg";
-// Derivada de src/assets/TKA06941.png (3458px, 8,6 MB) — o slot renderiza a ~600px.
-// Original preservado; regerar com sharp se trocar a foto.
+// Foto da fachada (inauguração), reduzida para 1600px em WebP — o slot renderiza a ~600px.
 import fachadaVR from "@/assets/fachada-vr.webp";
 import logoVRHorizontal from "@/assets/logohorizontal.png";
 import bancoItau from "@/assets/bancos/itau.svg";
@@ -83,13 +82,21 @@ const spin = (model: keyof typeof spinManifest) => ({
 const SPIN_360 = {
   shi175: spin("shi175"),
   jet125: spin("jet125"),
-  jef150: spin("jef150"),
   sbm250s: spin("sbm250s"),
   sbm250t: spin("sbm250t"),
   shi400sc: spin("shi400sc"),
   sbm600v: spin("sbm600v"),
   sbm600r: spin("sbm600r"),
 };
+
+// Fotos dos modelos "mais vendidos" de cada marca, recortadas das artes da loja
+// (src/assets/motos/catalogo/<marca>-<modelo>.webp). Fundo preto, que assenta no STUDIO_BG.
+const CATALOG_IMGS = import.meta.glob("/src/assets/motos/catalogo/*.webp", {
+  eager: true,
+  query: "?url",
+  import: "default",
+}) as Record<string, string>;
+const foto = (slug: string) => [CATALOG_IMGS[`/src/assets/motos/catalogo/${slug}.webp`]];
 
 // Seleciona 4 quadros específicos da sequência de giro 360° para as miniaturas da
 // vitrine. O primeiro índice de cada lista é sempre o ângulo de perfil (foto de lado),
@@ -195,7 +202,14 @@ function Nav() {
             aria-label={mobileOpen ? "Fechar menu" : "Abrir menu"}
             className="grid h-10 w-10 place-items-center rounded-lg border border-border text-ink transition hover:border-primary/40 hover:text-primary md:hidden"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5" aria-hidden>
+            <svg
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              className="h-5 w-5"
+              aria-hidden
+            >
               {mobileOpen ? (
                 <path strokeLinecap="round" strokeLinejoin="round" d="M6 6l12 12M18 6L6 18" />
               ) : (
@@ -312,6 +326,7 @@ function Stats() {
 }
 
 type Bike = {
+  brand: string;
   tag: string;
   name: string;
   desc: string;
@@ -323,8 +338,7 @@ type Bike = {
   wa: string;
 };
 
-// Modelos e fichas técnicas reais da linha Shineray comercializada no Brasil.
-// Fotos oficiais do fabricante (shineray.com.br), usadas pela revenda multimarcas.
+// Catálogo: os mais vendidos de cada marca (artes da loja) + linha SBM/Shineray com giro 360°.
 //
 // A vitrine não exibe preço: o fabricante reajusta sem aviso prévio e a condição
 // final depende de entrada, prazo e análise de crédito. No lugar do valor, o card
@@ -336,37 +350,210 @@ const wa = (model: string) =>
 
 const BIKES: Bike[] = [
   {
-    tag: "Trail",
-    name: "SHI 175",
-    desc: "Trail leve e versátil, pronta para o asfalto e para a estrada de chão. Painel digital, iluminação full LED e partida elétrica com pedal reserva.",
-    specs: ["175cc", "Partida elétrica", "Freio a disco duplo"],
+    brand: "Honda",
+    tag: "Urbana",
+    name: "BIZ 125",
+    desc: "Faz até 50 km/l, rodas em liga leve, partida elétrica e painel digital. A cub mais prática para o dia a dia.",
+    specs: ["125cc", "Até 50 km/l", "Partida elétrica"],
     badge: "Mais vendida",
-    imgs: pickAt(SPIN_360.shi175.frames, [7, 0, 14, 21]),
-    spin360: SPIN_360.shi175.frames,
-    spinSprite: SPIN_360.shi175.sprite,
-    wa: wa("SHI 175"),
+    imgs: foto("honda-biz125"),
+    wa: wa("Honda BIZ 125"),
   },
   {
+    brand: "Honda",
+    tag: "Street",
+    name: "CG 160",
+    desc: "Design esportivo, farol em LED, painel digital e partida elétrica. Faz até 40 km/l.",
+    specs: ["160cc", "Até 40 km/l", "Farol em LED"],
+    imgs: foto("honda-cg160"),
+    wa: wa("Honda CG 160"),
+  },
+  {
+    brand: "Honda",
+    tag: "Trail",
+    name: "BROS 160",
+    desc: "Moto alta e robusta para cidade e estrada de chão, com painel digital e partida elétrica. Faz até 40 km/l.",
+    specs: ["160cc", "Até 40 km/l", "Painel digital"],
+    imgs: foto("honda-bros160"),
+    wa: wa("Honda BROS 160"),
+  },
+  {
+    brand: "Honda",
+    tag: "Naked",
+    name: "CB 300",
+    desc: "Design robusto, farol em LED, painel digital e partida elétrica. Faz até 30 km/l.",
+    specs: ["300cc", "Até 30 km/l", "Farol em LED"],
+    imgs: foto("honda-cb300"),
+    wa: wa("Honda CB 300"),
+  },
+  {
+    brand: "Yamaha",
+    tag: "Street",
+    name: "FAZER 150",
+    desc: "Farol em LED, painel digital e partida elétrica. Faz até 45 km/l.",
+    specs: ["150cc", "Até 45 km/l", "Farol em LED"],
+    imgs: foto("yamaha-fazer150"),
+    wa: wa("Yamaha FAZER 150"),
+  },
+  {
+    brand: "Yamaha",
+    tag: "Naked",
+    name: "FAZER 250",
+    desc: "Design robusto, painel digital e partida elétrica. Faz até 35 km/l.",
+    specs: ["250cc", "Até 35 km/l", "Painel digital"],
+    imgs: foto("yamaha-fazer250"),
+    wa: wa("Yamaha FAZER 250"),
+  },
+  {
+    brand: "Yamaha",
+    tag: "Street",
+    name: "FACTOR 150",
+    desc: "Freios a disco, painel digital e partida elétrica. Faz até 40 km/l.",
+    specs: ["150cc", "Até 40 km/l", "Freios a disco"],
+    imgs: foto("yamaha-factor150"),
+    wa: wa("Yamaha FACTOR 150"),
+  },
+  {
+    brand: "Yamaha",
+    tag: "Sport",
+    name: "R15",
+    desc: "Design esportivo, farol em LED, painel digital e partida elétrica. Faz até 35 km/l.",
+    specs: ["150cc", "Até 35 km/l", "Farol em LED"],
+    imgs: foto("yamaha-r15"),
+    wa: wa("Yamaha R15"),
+  },
+  {
+    brand: "Yamaha",
+    tag: "Trail",
+    name: "LANDER 250",
+    desc: "Design off-road, farol em LED e painel digital. Faz até 30 km/l.",
+    specs: ["250cc", "Até 30 km/l", "Farol em LED"],
+    imgs: foto("yamaha-lander250"),
+    wa: wa("Yamaha LANDER 250"),
+  },
+  {
+    brand: "Shineray",
+    tag: "Urbana",
+    name: "PHOENIX 50",
+    desc: "Iluminação full LED, painel digital e partida elétrica. Faz até 48 km/l.",
+    specs: ["50cc", "Até 48 km/l", "Full LED"],
+    imgs: foto("shineray-phoenix50"),
+    wa: wa("Shineray PHOENIX 50"),
+  },
+  {
+    brand: "Shineray",
     tag: "Urbana",
     name: "JET 125",
-    desc: "Automática, leve e econômica — ideal para o dia a dia na cidade. Painel 100% digital, porta-objetos e baixo consumo de combustível.",
-    specs: ["125cc", "Câmbio automático", "Baixo consumo"],
+    desc: "Semi-automática, painel digital e partida elétrica. Faz até 45 km/l.",
+    specs: ["125cc", "Até 45 km/l", "Semi-automática"],
     imgs: pickAt(SPIN_360.jet125.frames, [6, 0, 12, 18]),
     spin360: SPIN_360.jet125.frames,
     spinSprite: SPIN_360.jet125.sprite,
-    wa: wa("JET 125"),
+    wa: wa("Shineray JET 125"),
   },
   {
+    brand: "Shineray",
+    tag: "Scooter",
+    name: "URBAN 150",
+    desc: "Automática, farol em LED, painel digital e amortecimento a gás. Faz até 40 km/l.",
+    specs: ["150cc", "Até 40 km/l", "Automática"],
+    imgs: foto("shineray-urban150"),
+    wa: wa("Shineray URBAN 150"),
+  },
+  {
+    brand: "Shineray",
+    tag: "Street",
+    name: "JEF 170",
+    desc: "Design esportivo, piscas flexíveis, painel digital e partida elétrica. Faz até 40 km/l.",
+    specs: ["170cc", "Até 40 km/l", "Painel digital"],
+    imgs: foto("shineray-jef170"),
+    wa: wa("Shineray JEF 170"),
+  },
+  {
+    brand: "Shineray",
+    tag: "Trail",
+    name: "SHI 175",
+    desc: "Design robusto, farol em LED, painel digital e partida elétrica. Faz até 40 km/l.",
+    specs: ["175cc", "Até 40 km/l", "Farol em LED"],
+    imgs: pickAt(SPIN_360.shi175.frames, [7, 0, 14, 21]),
+    spin360: SPIN_360.shi175.frames,
+    spinSprite: SPIN_360.shi175.sprite,
+    wa: wa("Shineray SHI 175"),
+  },
+  {
+    brand: "Avelloz",
+    tag: "Urbana",
+    name: "AZ1 50",
+    desc: "Câmbio de 4 marchas, farol em LED, freio a disco e rodas de liga leve.",
+    specs: ["50cc", "4 marchas", "Freio a disco"],
+    imgs: foto("avelloz-az1"),
+    wa: wa("Avelloz AZ1 50"),
+  },
+  {
+    brand: "Avelloz",
+    tag: "Urbana",
+    name: "AZ125 ALFA",
+    desc: "Injeção eletrônica, freios CBS, farol em LED, painel digital e partida elétrica.",
+    specs: ["125cc", "Injeção eletrônica", "Freios CBS"],
+    imgs: foto("avelloz-az125"),
+    wa: wa("Avelloz AZ125 ALFA"),
+  },
+  {
+    brand: "Avelloz",
+    tag: "Trail",
+    name: "AZ160 XTREME",
+    desc: "Freios CBS, farol em LED, painel digital e partida elétrica. Faz até 35 km/l.",
+    specs: ["160cc", "Até 35 km/l", "Freios CBS"],
+    imgs: foto("avelloz-az160"),
+    wa: wa("Avelloz AZ160 XTREME"),
+  },
+  {
+    brand: "Avelloz",
+    tag: "Street",
+    name: "AZ170 BRAVO",
+    desc: "18,3 cavalos, farol em LED, painel digital e partida elétrica. Faz até 40 km/l.",
+    specs: ["170cc", "18,3cv", "Até 40 km/l"],
+    imgs: foto("avelloz-az170"),
+    wa: wa("Avelloz AZ170 BRAVO"),
+  },
+  {
+    brand: "Haojue",
+    tag: "Street",
+    name: "DK 160",
+    desc: "Rodas em liga leve, painel digital e partida elétrica. Faz até 40 km/l.",
+    specs: ["160cc", "Até 40 km/l", "Painel digital"],
+    imgs: foto("haojue-dk160"),
+    wa: wa("Haojue DK 160"),
+  },
+  {
+    brand: "Haojue",
     tag: "Naked",
-    name: "JEF 150",
-    desc: "Naked de entrada com visual moderno, painel 100% digital novo e iluminação full LED. Leve, ágil e com ótimo custo-benefício no dia a dia.",
-    specs: ["150cc", "Painel digital", "Freio a disco"],
-    imgs: pickAt(SPIN_360.jef150.frames, [7, 0, 14, 21]),
-    spin360: SPIN_360.jef150.frames,
-    spinSprite: SPIN_360.jef150.sprite,
-    wa: wa("JEF 150"),
+    name: "DR 160",
+    desc: "Design esportivo, farol em LED, painel digital e partida elétrica. Faz até 40 km/l.",
+    specs: ["160cc", "Até 40 km/l", "Farol em LED"],
+    imgs: foto("haojue-dr160"),
+    wa: wa("Haojue DR 160"),
   },
   {
+    brand: "Haojue",
+    tag: "Trail",
+    name: "NK 160",
+    desc: "Piscas flexíveis, painel digital e partida elétrica. Faz até 40 km/l.",
+    specs: ["160cc", "Até 40 km/l", "Painel digital"],
+    imgs: foto("haojue-nk160"),
+    wa: wa("Haojue NK 160"),
+  },
+  {
+    brand: "Haojue",
+    tag: "Trail",
+    name: "DL 160",
+    desc: "Design robusto, farol em LED, painel digital e partida elétrica. Faz até 45 km/l.",
+    specs: ["160cc", "Até 45 km/l", "Farol em LED"],
+    imgs: foto("haojue-dl160"),
+    wa: wa("Haojue DL 160"),
+  },
+  {
+    brand: "SBM",
     tag: "Sport",
     name: "SBM 250s",
     desc: "Esportiva média com motor DOHC, freios ABS nas duas rodas e painel digital com Bluetooth. Performance de verdade para quem gosta de pilotar.",
@@ -378,6 +565,7 @@ const BIKES: Bike[] = [
     wa: wa("SBM 250s"),
   },
   {
+    brand: "SBM",
     tag: "Big Trail",
     name: "SBM 250t",
     desc: "Big trail com motor DOHC refrigerado a líquido, câmbio de 6 marchas e ABS nas duas rodas. Conforto de viagem com fôlego de sobra para a trilha.",
@@ -388,6 +576,7 @@ const BIKES: Bike[] = [
     wa: wa("SBM 250t"),
   },
   {
+    brand: "Shineray",
     tag: "Scrambler",
     name: "SHI 400sc",
     desc: "Scrambler de estilo clássico com motor de 400cc, iluminação full LED, USB e sensor de cavalete. Versatilidade para rodovia e cidade.",
@@ -398,6 +587,7 @@ const BIKES: Bike[] = [
     wa: wa("SHI 400sc"),
   },
   {
+    brand: "SBM",
     tag: "Custom",
     name: "SBM 600V",
     desc: "Custom de presença com motor V4 de 600cc, painel TFT com Bluetooth e freio duplo disco com ABS nas duas rodas. Conforto e estilo para rodar em grande estilo.",
@@ -408,6 +598,7 @@ const BIKES: Bike[] = [
     wa: wa("SBM 600V"),
   },
   {
+    brand: "SBM",
     tag: "Sport",
     name: "SBM 600R",
     desc: "Esportiva de ponta com motor 4 cilindros e 88,4cv, freios ABS nas duas rodas e painel TFT com espelhamento de tela via aplicativo. O topo de linha da revenda.",
@@ -466,7 +657,15 @@ function AngleIndicator({
     >
       <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden>
         <circle cx="14" cy="14" r="12" fill="none" className="stroke-border" strokeWidth="1.5" />
-        <line x1="14" y1="14" x2={x2} y2={y2} className="stroke-primary" strokeWidth="2" strokeLinecap="round" />
+        <line
+          x1="14"
+          y1="14"
+          x2={x2}
+          y2={y2}
+          className="stroke-primary"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
         <circle cx="14" cy="14" r="1.5" className="fill-primary" />
       </svg>
       <span className="text-[11px] font-semibold tabular-nums text-ink">{Math.round(angle)}°</span>
@@ -594,11 +793,13 @@ function Spin360Viewer({
               backgroundSize: `${sprite.cols * 100}% ${sprite.rows * 100}%`,
               backgroundPosition: `${
                 sprite.cols > 1
-                  ? ((displayIndex % sprite.perSheet) % sprite.cols) / (sprite.cols - 1) * 100
+                  ? (((displayIndex % sprite.perSheet) % sprite.cols) / (sprite.cols - 1)) * 100
                   : 0
               }% ${
                 sprite.rows > 1
-                  ? Math.floor((displayIndex % sprite.perSheet) / sprite.cols) / (sprite.rows - 1) * 100
+                  ? (Math.floor((displayIndex % sprite.perSheet) / sprite.cols) /
+                      (sprite.rows - 1)) *
+                    100
                   : 0
               }%`,
               backgroundRepeat: "no-repeat",
@@ -901,12 +1102,16 @@ function Lightbox({
                 >
                   {lbMode === "360" ? (
                     <>
-                      <span aria-hidden className="text-base leading-none sm:text-xl">✕</span>
+                      <span aria-hidden className="text-base leading-none sm:text-xl">
+                        ✕
+                      </span>
                       <span className="text-[8px] font-semibold sm:text-[10px]">Ver fotos</span>
                     </>
                   ) : (
                     <>
-                      <span aria-hidden className="text-base leading-none sm:text-xl">⟳</span>
+                      <span aria-hidden className="text-base leading-none sm:text-xl">
+                        ⟳
+                      </span>
                       <span className="text-[9px] font-bold leading-none sm:text-[11px]">360°</span>
                       <span className="text-[7px] font-medium sm:text-[9px]">Ver em 360</span>
                     </>
@@ -1033,39 +1238,41 @@ function BikeGallery({
           </button>
         )}
       </div>
-      <div
-        className="grid grid-cols-4 gap-1.5 border-b border-border p-2.5"
-        onMouseLeave={() => setActive(0)}
-      >
-        {bike.imgs.map((im, i) => (
-          <button
-            key={i}
-            type="button"
-            onClick={() => {
-              setActive(i);
-              setMode("gallery");
-              onExpand("gallery", i);
-            }}
-            onMouseEnter={() => setActive(i)}
-            aria-label={`Ver foto ${i + 1} da ${bike.name}`}
-            aria-current={mode === "gallery" && active === i}
-            className={`relative aspect-[4/3] overflow-hidden rounded-md border transition ${THUMB_BG} ${
-              mode === "gallery" && active === i
-                ? "border-primary ring-1 ring-primary/40"
-                : "border-border opacity-60 hover:opacity-100"
-            }`}
-          >
-            <img
-              src={im}
-              alt=""
-              width={300}
-              height={225}
-              loading="lazy"
-              className="h-full w-full object-contain p-1"
-            />
-          </button>
-        ))}
-      </div>
+      {bike.imgs.length > 1 && (
+        <div
+          className="grid grid-cols-4 gap-1.5 border-b border-border p-2.5"
+          onMouseLeave={() => setActive(0)}
+        >
+          {bike.imgs.map((im, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => {
+                setActive(i);
+                setMode("gallery");
+                onExpand("gallery", i);
+              }}
+              onMouseEnter={() => setActive(i)}
+              aria-label={`Ver foto ${i + 1} da ${bike.name}`}
+              aria-current={mode === "gallery" && active === i}
+              className={`relative aspect-[4/3] overflow-hidden rounded-md border transition ${THUMB_BG} ${
+                mode === "gallery" && active === i
+                  ? "border-primary ring-1 ring-primary/40"
+                  : "border-border opacity-60 hover:opacity-100"
+              }`}
+            >
+              <img
+                src={im}
+                alt=""
+                width={300}
+                height={225}
+                loading="lazy"
+                className="h-full w-full object-contain p-1"
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -1114,11 +1321,11 @@ function ShowroomBrands() {
 
 function Lineup() {
   const categories = useMemo(
-    () => ["Todas", ...Array.from(new Set(BIKES.map((b) => b.tag)))],
+    () => ["Todas", ...Array.from(new Set(BIKES.map((b) => b.brand)))],
     [],
   );
   const [filter, setFilter] = useState("Todas");
-  const visible = filter === "Todas" ? BIKES : BIKES.filter((b) => b.tag === filter);
+  const visible = filter === "Todas" ? BIKES : BIKES.filter((b) => b.brand === filter);
   const [lightbox, setLightbox] = useState<{
     bike: Bike;
     mode: "gallery" | "360";
@@ -1144,7 +1351,7 @@ function Lineup() {
 
       <ShowroomBrands />
 
-      <div className="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filtrar por categoria">
+      <div className="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filtrar por marca">
         {categories.map((c) => (
           <button
             key={c}
@@ -1174,6 +1381,9 @@ function Lineup() {
             />
             <div className="flex flex-1 flex-col gap-4 p-5">
               <div>
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
+                  {b.brand}
+                </p>
                 <h3 className="font-display text-xl font-bold text-ink">{b.name}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.desc}</p>
               </div>
@@ -1195,8 +1405,8 @@ function Lineup() {
           <span aria-hidden>→</span>
         </a>
         <p className="text-center text-xs text-muted-foreground/70">
-          Valores e condições sob consulta, sujeitos a análise de crédito e a alteração sem
-          aviso prévio. Fale com um consultor VR para a simulação atualizada.
+          Valores e condições sob consulta, sujeitos a análise de crédito e a alteração sem aviso
+          prévio. Fale com um consultor VR para a simulação atualizada.
         </p>
       </div>
 
@@ -1274,7 +1484,7 @@ function Experience() {
               src={fachadaVR}
               alt="Fachada da loja VR Biguaçu, com motos expostas na vitrine"
               width={1600}
-              height={1069}
+              height={1066}
               loading="lazy"
               className="h-full w-full object-cover"
             />
@@ -1318,10 +1528,22 @@ function Experience() {
 
 function Services() {
   const items = [
-    { t: "Oficina certificada", d: "Mecânicos treinados, peças originais e diagnóstico digital. Sua moto volta melhor do que entrou." },
-    { t: "Seminovos com procedência", d: "Toda moto usada passa por 47 pontos de inspeção antes de entrar no showroom." },
-    { t: "Acessórios e equipamentos", d: "Capacetes, roupas e acessórios das principais marcas para pilotar com segurança." },
-    { t: "Documentação inclusa", d: "Transferência, emplacamento e primeira revisão — a gente cuida de tudo pra você." },
+    {
+      t: "Oficina certificada",
+      d: "Mecânicos treinados, peças originais e diagnóstico digital. Sua moto volta melhor do que entrou.",
+    },
+    {
+      t: "Seminovos com procedência",
+      d: "Toda moto usada passa por 47 pontos de inspeção antes de entrar no showroom.",
+    },
+    {
+      t: "Acessórios e equipamentos",
+      d: "Capacetes, roupas e acessórios das principais marcas para pilotar com segurança.",
+    },
+    {
+      t: "Documentação inclusa",
+      d: "Transferência, emplacamento e primeira revisão — a gente cuida de tudo pra você.",
+    },
   ];
   return (
     <section id="servicos" className="mx-auto max-w-7xl px-5 py-20 lg:px-8 lg:py-24">
@@ -1374,10 +1596,7 @@ const BANK_PARTNERS: { name: string; logo: string; size?: string }[] = [
 
 function Financing() {
   return (
-    <section
-      id="financiamento"
-      className="relative overflow-hidden py-20 lg:py-24"
-    >
+    <section id="financiamento" className="relative overflow-hidden py-20 lg:py-24">
       <img
         src={heroBike}
         alt=""
@@ -1427,10 +1646,7 @@ function Financing() {
             {[FINANCING_STATS.slice(0, 2), FINANCING_STATS.slice(2, 4)].map((row, i) => (
               <div key={i} className="grid grid-cols-2 divide-x divide-border/60">
                 {row.map((f) => (
-                  <div
-                    key={f.v}
-                    className="flex flex-col items-center px-5 py-4 text-center"
-                  >
+                  <div key={f.v} className="flex flex-col items-center px-5 py-4 text-center">
                     <span className="grid h-11 w-11 place-items-center rounded-full bg-primary/10 text-primary">
                       <f.icon className="h-5 w-5" strokeWidth={2} aria-hidden />
                     </span>
@@ -1474,10 +1690,26 @@ function initials(name: string) {
 
 function Testimonials() {
   const items = [
-    { n: "Rafael M.", c: "Biguaçu/SC", t: "Terceira moto que compro na VR. Atendimento honesto, entrega no prazo e a oficina é referência. Recomendo de olhos fechados." },
-    { n: "Camila B.", c: "Palhoça/SC", t: "Fui esperando pressão de vendedor e encontrei gente que ouviu. Saí com a moto certa e uma condição que coube no bolso." },
-    { n: "Diego P.", c: "São José/SC", t: "Comprei uma trail, veio revisada e com documentação em dia. É o padrão que a gente sempre quis num revendedor." },
-    { n: "Jeferson", c: "Florianópolis/SC", t: "Comprei uma moto 0km. Excelente atendimento e entrega." },
+    {
+      n: "Rafael M.",
+      c: "Biguaçu/SC",
+      t: "Terceira moto que compro na VR. Atendimento honesto, entrega no prazo e a oficina é referência. Recomendo de olhos fechados.",
+    },
+    {
+      n: "Camila B.",
+      c: "Palhoça/SC",
+      t: "Fui esperando pressão de vendedor e encontrei gente que ouviu. Saí com a moto certa e uma condição que coube no bolso.",
+    },
+    {
+      n: "Diego P.",
+      c: "São José/SC",
+      t: "Comprei uma trail, veio revisada e com documentação em dia. É o padrão que a gente sempre quis num revendedor.",
+    },
+    {
+      n: "Jeferson",
+      c: "Florianópolis/SC",
+      t: "Comprei uma moto 0km. Excelente atendimento e entrega.",
+    },
   ];
   return (
     <section className="border-y border-border bg-surface">
@@ -1534,25 +1766,36 @@ function Visit() {
             title="Um café, uma volta e a sua próxima moto."
           />
           <p className="mt-5 max-w-md text-muted-foreground">
-            Nosso showroom foi feito pra você passar tempo. Chega, escolhe, testa. Sem pressa e
-            sem pressão.
+            Nosso showroom foi feito pra você passar tempo. Chega, escolhe, testa. Sem pressa e sem
+            pressão.
           </p>
           <div className="mt-10 grid gap-6 sm:grid-cols-2">
             <div>
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Endereço</p>
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
+                Endereço
+              </p>
               <p className="mt-2 text-sm">
-                Rua Manoel Mariano Ferreira, 160<br />Rio Caveiras — Biguaçu / SC, 88161-372
+                Rua Manoel Mariano Ferreira, 160
+                <br />
+                Rio Caveiras — Biguaçu / SC, 88161-372
               </p>
             </div>
             <div>
               <p className="text-[11px] uppercase tracking-widest text-muted-foreground">Horário</p>
               <p className="mt-2 text-sm">
-                Seg a Sáb — 8h às 20h<br />Domingo — fechado
+                Seg a Sáb — 10h às 19h
+                <br />
+                Domingo — fechado
               </p>
             </div>
             <div>
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">WhatsApp</p>
-              <a href={WHATSAPP} className="mt-2 block text-sm font-semibold text-primary hover:underline">
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
+                WhatsApp
+              </p>
+              <a
+                href={WHATSAPP}
+                className="mt-2 block text-sm font-semibold text-primary hover:underline"
+              >
                 (48) 99178-8090
               </a>
             </div>
@@ -1605,8 +1848,8 @@ function Footer() {
         <div className="flex flex-col gap-3 sm:col-span-2 lg:col-span-1">
           <Logo />
           <p className="max-w-sm text-xs">
-            VR Biguaçu é uma unidade franqueada do Grupo VR, referência em varejo
-            motociclístico no Brasil.
+            VR Biguaçu é uma unidade franqueada do Grupo VR, referência em varejo motociclístico no
+            Brasil.
           </p>
         </div>
         <div>
@@ -1623,13 +1866,15 @@ function Footer() {
           <p className="text-[11px] font-semibold uppercase tracking-widest text-ink">Contato</p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
             <span>Rua Manoel Mariano Ferreira, 160 — Rio Caveiras, Biguaçu/SC</span>
-            <a href={WHATSAPP} className="transition hover:text-primary">(48) 99178-8090</a>
+            <a href={WHATSAPP} className="transition hover:text-primary">
+              (48) 99178-8090
+            </a>
           </div>
         </div>
         <div>
           <p className="text-[11px] font-semibold uppercase tracking-widest text-ink">Horário</p>
           <div className="mt-4 flex flex-col gap-2.5 text-sm">
-            <span>Seg a Sáb — 8h às 20h</span>
+            <span>Seg a Sáb — 10h às 19h</span>
             <span>Domingo — fechado</span>
           </div>
         </div>
