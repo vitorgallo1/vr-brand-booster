@@ -1,14 +1,19 @@
 # Painel de estoque — /admin
 
-Um painel só para as duas lojas. Abre em `/admin` de qualquer um dos dois sites
-(`vrmultimarcatijucas.netlify.app/admin` ou `vrmultimarcastaubate.netlify.app/admin`) e edita a mesma lista.
-Para isso funcionar, o site de Taubaté precisa das variáveis `ESTOQUE_SITE_ID` e
-`ESTOQUE_TOKEN` (ver `DEPLOY.md`). Sem elas, o painel avisa no topo.
+Painel da loja de Biguaçu, trazido do projeto de Tijucas/Taubaté. Abre em `/admin` do
+site e grava o estoque no Netlify Blobs do próprio site (só desta loja).
+
+No Netlify (Site configuration → Environment variables), antes do primeiro acesso:
+
+- `PAINEL_SENHA` — a senha do painel
+- `PAINEL_SEGREDO` — uma sequência aleatória de 32+ caracteres
+
+Sem `PAINEL_SENHA`, o login é recusado. Variável nova só vale depois de um deploy novo.
 
 ## Primeiro acesso
 
 1. Entre com a senha (`PAINEL_SENHA`).
-2. O estoque começa vazio, e a vitrine mostra o catálogo do projeto (as 50 motos).
+2. O estoque começa vazio, e a vitrine mostra o catálogo do projeto (59 motos).
    Clique em **Importar o catálogo do projeto** para trazer essas motos para o painel e
    editá-las a partir daí.
 3. Nada vai ao ar sem **Salvar alterações**.
