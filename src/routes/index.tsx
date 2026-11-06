@@ -29,82 +29,22 @@ import bancoCaixa from "@/assets/bancos/caixa.svg";
 // quadrinho que os envolve, então some.
 import bancoPorto from "@/assets/bancos/portobank.png";
 import bancoPan from "@/assets/bancos/pan.png";
-// Marcas do showroom. Recortadas da arte única que a loja mandou, com o fundo preto
-// convertido em transparência para assentarem em qualquer tom escuro do tema.
-import marcaAvelloz from "@/assets/marcas/avelloz.png";
-import marcaBull from "@/assets/marcas/bull.png";
-import marcaHaojue from "@/assets/marcas/haojue.png";
-import marcaHonda from "@/assets/marcas/honda.png";
-import marcaSbm from "@/assets/marcas/sbm.png";
-import marcaShineray from "@/assets/marcas/shineray.png";
-import marcaSuzuki from "@/assets/marcas/suzuki.png";
-import marcaYamaha from "@/assets/marcas/yamaha.png";
-import marcaZontes from "@/assets/marcas/zontes.png";
-import spinManifest from "@/assets/motos/360-web/manifest.json";
-
-// Todas as fotos das motos vêm da sequência de giro 360° do fabricante
-// (recortes com fundo transparente) — o fundo de estúdio (STUDIO_BG) é aplicado por
-// trás delas para dar um visual consistente em toda a vitrine.
-//
-// O que é importado aqui é a saída de `npm run build:360`, não os originais: eles são
-// 2560x1707 (~17,5 MB de bitmap decodificado por quadro) para um card que renderiza a
-// 388x291. Cada moto tem duas camadas — sprites de 640px para o giro do card (3-5
-// requisições no lugar de 19-44) e quadros de 1280px para o lightbox, onde o detalhe
-// importa. Ver scripts/build-360.mjs.
-type SpinSprite = {
-  sheets: string[];
-  count: number;
-  cols: number;
-  rows: number;
-  perSheet: number;
-  frameW: number;
-  frameH: number;
-};
-
-const SPIN_URLS = import.meta.glob("/src/assets/motos/360-web/**/*.webp", {
-  eager: true,
-  query: "?url",
-  import: "default",
-}) as Record<string, string>;
-
-// `numeric` importa: sem ele f-10 viria antes de f-02, e a ordem dos quadros é o giro.
-const urlsFor = (model: string, prefix: "f" | "s") =>
-  Object.entries(SPIN_URLS)
-    .filter(([path]) => path.includes(`/360-web/${model}/${prefix}-`))
-    .sort(([a], [b]) => a.localeCompare(b, undefined, { numeric: true }))
-    .map(([, url]) => url);
-
-const spin = (model: keyof typeof spinManifest) => ({
-  frames: urlsFor(model, "f"),
-  sprite: { sheets: urlsFor(model, "s"), ...spinManifest[model] } as SpinSprite,
-});
-
-const SPIN_360 = {
-  shi175: spin("shi175"),
-  jet125: spin("jet125"),
-  sbm250s: spin("sbm250s"),
-  sbm250t: spin("sbm250t"),
-  shi400sc: spin("shi400sc"),
-  sbm600v: spin("sbm600v"),
-  sbm600r: spin("sbm600r"),
-};
-
-// Fotos dos modelos "mais vendidos" de cada marca, recortadas das artes da loja
-// (src/assets/motos/catalogo/<marca>-<modelo>.webp). Fundo preto, que assenta no STUDIO_BG.
-const CATALOG_IMGS = import.meta.glob("/src/assets/motos/catalogo/*.webp", {
-  eager: true,
-  query: "?url",
-  import: "default",
-}) as Record<string, string>;
-const foto = (slug: string) => [CATALOG_IMGS[`/src/assets/motos/catalogo/${slug}.webp`]];
-
-// Seleciona 4 quadros específicos da sequência de giro 360° para as miniaturas da
-// vitrine. O primeiro índice de cada lista é sempre o ângulo de perfil (foto de lado),
-// conferido manualmente quadro a quadro em cada modelo.
-const pickAt = (frames: string[], indices: number[]) => indices.map((i) => frames[i]);
+import { carregarVitrine } from "@/servidor/estoque";
+import { ordenarDestaques } from "@/lib/motos";
+import {
+  BikeCard,
+  Lightbox,
+  SeloMarca,
+  marcasPresentes,
+  paraBike,
+  type Bike,
+} from "@/components/vitrine";
 
 export const Route = createFileRoute("/")({
   component: Index,
+  // A vitrine vem do estoque salvo no painel /admin. Enquanto ninguém cadastrou nada,
+  // o servidor devolve o catálogo que veio no projeto (src/data/catalogo.ts).
+  loader: async () => carregarVitrine(),
 });
 
 const WHATSAPP = `https://wa.me/5548991788090?text=${encodeURIComponent(
@@ -114,6 +54,7 @@ const WHATSAPP = `https://wa.me/5548991788090?text=${encodeURIComponent(
 // Usado pela nav desktop, nav mobile e footer — os 3 lugares que listam as mesmas
 // âncoras da página, cada um com seu próprio estilo de link.
 const NAV_LINKS = [
+  { href: "#destaques", label: "Mais vendidas" },
   { href: "#linha", label: "Motos" },
   { href: "#financiamento", label: "Financiamento" },
   { href: "#experiencia", label: "Experiência" },
@@ -122,19 +63,32 @@ const NAV_LINKS = [
 ];
 
 function Index() {
+  const { motos } = Route.useLoaderData();
+  const bikes = useMemo(() => motos.map(paraBike), [motos]);
+  const [lightbox, setLightbox] = useState<{ bike: Bike; cor: number; foto: number } | null>(null);
+  const ampliar = (bike: Bike, cor: number, foto = 0) => setLightbox({ bike, cor, foto });
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       <Nav />
       <Hero />
       <Stats />
-      <Lineup />
+      <Destaques bikes={bikes} onAmpliar={ampliar} />
+      <Lineup bikes={bikes} onAmpliar={ampliar} />
       <Testimonials />
       <Financing />
       <Experience />
       <Services />
       <Visit />
       <Footer />
-      <FloatingWhatsApp />
+      {lightbox && (
+        <Lightbox
+          bike={lightbox.bike}
+          corInicial={lightbox.cor}
+          fotoInicial={lightbox.foto}
+          onClose={() => setLightbox(null)}
+        />
+      )}
     </div>
   );
 }
@@ -325,1109 +279,215 @@ function Stats() {
   );
 }
 
-type Bike = {
-  brand: string;
-  tag: string;
-  name: string;
-  desc: string;
-  specs: string[];
-  badge?: string;
-  imgs: string[];
-  spin360?: string[];
-  spinSprite?: SpinSprite;
-  wa: string;
-};
+// ---------------------------------------------------------------------------------
+// Seções da vitrine
+// ---------------------------------------------------------------------------------
 
-// Catálogo: os mais vendidos de cada marca (artes da loja) + linha SBM/Shineray com giro 360°.
-//
-// A vitrine não exibe preço: o fabricante reajusta sem aviso prévio e a condição
-// final depende de entrada, prazo e análise de crédito. No lugar do valor, o card
-// leva direto para a simulação no WhatsApp.
-const wa = (model: string) =>
-  `https://wa.me/5548991788090?text=${encodeURIComponent(
-    `Olá! Gostaria de conhecer a ${model} da VR Multimarcas Biguaçu.`,
-  )}`;
-
-const BIKES: Bike[] = [
-  {
-    brand: "Honda",
-    tag: "Urbana",
-    name: "BIZ 125",
-    desc: "Faz até 50 km/l, rodas em liga leve, partida elétrica e painel digital. A cub mais prática para o dia a dia.",
-    specs: ["125cc", "Até 50 km/l", "Partida elétrica"],
-    badge: "Mais vendida",
-    imgs: foto("honda-biz125"),
-    wa: wa("Honda BIZ 125"),
-  },
-  {
-    brand: "Honda",
-    tag: "Street",
-    name: "CG 160",
-    desc: "Design esportivo, farol em LED, painel digital e partida elétrica. Faz até 40 km/l.",
-    specs: ["160cc", "Até 40 km/l", "Farol em LED"],
-    imgs: foto("honda-cg160"),
-    wa: wa("Honda CG 160"),
-  },
-  {
-    brand: "Honda",
-    tag: "Trail",
-    name: "BROS 160",
-    desc: "Moto alta e robusta para cidade e estrada de chão, com painel digital e partida elétrica. Faz até 40 km/l.",
-    specs: ["160cc", "Até 40 km/l", "Painel digital"],
-    imgs: foto("honda-bros160"),
-    wa: wa("Honda BROS 160"),
-  },
-  {
-    brand: "Honda",
-    tag: "Naked",
-    name: "CB 300",
-    desc: "Design robusto, farol em LED, painel digital e partida elétrica. Faz até 30 km/l.",
-    specs: ["300cc", "Até 30 km/l", "Farol em LED"],
-    imgs: foto("honda-cb300"),
-    wa: wa("Honda CB 300"),
-  },
-  {
-    brand: "Yamaha",
-    tag: "Street",
-    name: "FAZER 150",
-    desc: "Farol em LED, painel digital e partida elétrica. Faz até 45 km/l.",
-    specs: ["150cc", "Até 45 km/l", "Farol em LED"],
-    imgs: foto("yamaha-fazer150"),
-    wa: wa("Yamaha FAZER 150"),
-  },
-  {
-    brand: "Yamaha",
-    tag: "Naked",
-    name: "FAZER 250",
-    desc: "Design robusto, painel digital e partida elétrica. Faz até 35 km/l.",
-    specs: ["250cc", "Até 35 km/l", "Painel digital"],
-    imgs: foto("yamaha-fazer250"),
-    wa: wa("Yamaha FAZER 250"),
-  },
-  {
-    brand: "Yamaha",
-    tag: "Street",
-    name: "FACTOR 150",
-    desc: "Freios a disco, painel digital e partida elétrica. Faz até 40 km/l.",
-    specs: ["150cc", "Até 40 km/l", "Freios a disco"],
-    imgs: foto("yamaha-factor150"),
-    wa: wa("Yamaha FACTOR 150"),
-  },
-  {
-    brand: "Yamaha",
-    tag: "Sport",
-    name: "R15",
-    desc: "Design esportivo, farol em LED, painel digital e partida elétrica. Faz até 35 km/l.",
-    specs: ["150cc", "Até 35 km/l", "Farol em LED"],
-    imgs: foto("yamaha-r15"),
-    wa: wa("Yamaha R15"),
-  },
-  {
-    brand: "Yamaha",
-    tag: "Trail",
-    name: "LANDER 250",
-    desc: "Design off-road, farol em LED e painel digital. Faz até 30 km/l.",
-    specs: ["250cc", "Até 30 km/l", "Farol em LED"],
-    imgs: foto("yamaha-lander250"),
-    wa: wa("Yamaha LANDER 250"),
-  },
-  {
-    brand: "Shineray",
-    tag: "Urbana",
-    name: "PHOENIX 50",
-    desc: "Iluminação full LED, painel digital e partida elétrica. Faz até 48 km/l.",
-    specs: ["50cc", "Até 48 km/l", "Full LED"],
-    imgs: foto("shineray-phoenix50"),
-    wa: wa("Shineray PHOENIX 50"),
-  },
-  {
-    brand: "Shineray",
-    tag: "Urbana",
-    name: "JET 125",
-    desc: "Semi-automática, painel digital e partida elétrica. Faz até 45 km/l.",
-    specs: ["125cc", "Até 45 km/l", "Semi-automática"],
-    imgs: pickAt(SPIN_360.jet125.frames, [6, 0, 12, 18]),
-    spin360: SPIN_360.jet125.frames,
-    spinSprite: SPIN_360.jet125.sprite,
-    wa: wa("Shineray JET 125"),
-  },
-  {
-    brand: "Shineray",
-    tag: "Scooter",
-    name: "URBAN 150",
-    desc: "Automática, farol em LED, painel digital e amortecimento a gás. Faz até 40 km/l.",
-    specs: ["150cc", "Até 40 km/l", "Automática"],
-    imgs: foto("shineray-urban150"),
-    wa: wa("Shineray URBAN 150"),
-  },
-  {
-    brand: "Shineray",
-    tag: "Street",
-    name: "JEF 170",
-    desc: "Design esportivo, piscas flexíveis, painel digital e partida elétrica. Faz até 40 km/l.",
-    specs: ["170cc", "Até 40 km/l", "Painel digital"],
-    imgs: foto("shineray-jef170"),
-    wa: wa("Shineray JEF 170"),
-  },
-  {
-    brand: "Shineray",
-    tag: "Trail",
-    name: "SHI 175",
-    desc: "Design robusto, farol em LED, painel digital e partida elétrica. Faz até 40 km/l.",
-    specs: ["175cc", "Até 40 km/l", "Farol em LED"],
-    imgs: pickAt(SPIN_360.shi175.frames, [7, 0, 14, 21]),
-    spin360: SPIN_360.shi175.frames,
-    spinSprite: SPIN_360.shi175.sprite,
-    wa: wa("Shineray SHI 175"),
-  },
-  {
-    brand: "Avelloz",
-    tag: "Urbana",
-    name: "AZ1 50",
-    desc: "Câmbio de 4 marchas, farol em LED, freio a disco e rodas de liga leve.",
-    specs: ["50cc", "4 marchas", "Freio a disco"],
-    imgs: foto("avelloz-az1"),
-    wa: wa("Avelloz AZ1 50"),
-  },
-  {
-    brand: "Avelloz",
-    tag: "Urbana",
-    name: "AZ125 ALFA",
-    desc: "Injeção eletrônica, freios CBS, farol em LED, painel digital e partida elétrica.",
-    specs: ["125cc", "Injeção eletrônica", "Freios CBS"],
-    imgs: foto("avelloz-az125"),
-    wa: wa("Avelloz AZ125 ALFA"),
-  },
-  {
-    brand: "Avelloz",
-    tag: "Trail",
-    name: "AZ160 XTREME",
-    desc: "Freios CBS, farol em LED, painel digital e partida elétrica. Faz até 35 km/l.",
-    specs: ["160cc", "Até 35 km/l", "Freios CBS"],
-    imgs: foto("avelloz-az160"),
-    wa: wa("Avelloz AZ160 XTREME"),
-  },
-  {
-    brand: "Avelloz",
-    tag: "Street",
-    name: "AZ170 BRAVO",
-    desc: "18,3 cavalos, farol em LED, painel digital e partida elétrica. Faz até 40 km/l.",
-    specs: ["170cc", "18,3cv", "Até 40 km/l"],
-    imgs: foto("avelloz-az170"),
-    wa: wa("Avelloz AZ170 BRAVO"),
-  },
-  {
-    brand: "Haojue",
-    tag: "Street",
-    name: "DK 160",
-    desc: "Rodas em liga leve, painel digital e partida elétrica. Faz até 40 km/l.",
-    specs: ["160cc", "Até 40 km/l", "Painel digital"],
-    imgs: foto("haojue-dk160"),
-    wa: wa("Haojue DK 160"),
-  },
-  {
-    brand: "Haojue",
-    tag: "Naked",
-    name: "DR 160",
-    desc: "Design esportivo, farol em LED, painel digital e partida elétrica. Faz até 40 km/l.",
-    specs: ["160cc", "Até 40 km/l", "Farol em LED"],
-    imgs: foto("haojue-dr160"),
-    wa: wa("Haojue DR 160"),
-  },
-  {
-    brand: "Haojue",
-    tag: "Trail",
-    name: "NK 160",
-    desc: "Piscas flexíveis, painel digital e partida elétrica. Faz até 40 km/l.",
-    specs: ["160cc", "Até 40 km/l", "Painel digital"],
-    imgs: foto("haojue-nk160"),
-    wa: wa("Haojue NK 160"),
-  },
-  {
-    brand: "Haojue",
-    tag: "Trail",
-    name: "DL 160",
-    desc: "Design robusto, farol em LED, painel digital e partida elétrica. Faz até 45 km/l.",
-    specs: ["160cc", "Até 45 km/l", "Farol em LED"],
-    imgs: foto("haojue-dl160"),
-    wa: wa("Haojue DL 160"),
-  },
-  {
-    brand: "SBM",
-    tag: "Sport",
-    name: "SBM 250s",
-    desc: "Esportiva média com motor DOHC, freios ABS nas duas rodas e painel digital com Bluetooth. Performance de verdade para quem gosta de pilotar.",
-    specs: ["250cc DOHC", "ABS duplo canal", "Painel com Bluetooth"],
-    badge: "Lançamento",
-    imgs: pickAt(SPIN_360.sbm250s.frames, [11, 0, 22, 33]),
-    spin360: SPIN_360.sbm250s.frames,
-    spinSprite: SPIN_360.sbm250s.sprite,
-    wa: wa("SBM 250s"),
-  },
-  {
-    brand: "SBM",
-    tag: "Big Trail",
-    name: "SBM 250t",
-    desc: "Big trail com motor DOHC refrigerado a líquido, câmbio de 6 marchas e ABS nas duas rodas. Conforto de viagem com fôlego de sobra para a trilha.",
-    specs: ["250cc DOHC", "6 marchas", "ABS duplo canal"],
-    imgs: pickAt(SPIN_360.sbm250t.frames, [5, 0, 11, 16]),
-    spin360: SPIN_360.sbm250t.frames,
-    spinSprite: SPIN_360.sbm250t.sprite,
-    wa: wa("SBM 250t"),
-  },
-  {
-    brand: "Shineray",
-    tag: "Scrambler",
-    name: "SHI 400sc",
-    desc: "Scrambler de estilo clássico com motor de 400cc, iluminação full LED, USB e sensor de cavalete. Versatilidade para rodovia e cidade.",
-    specs: ["400cc", "ABS duplo canal", "Painel TFT"],
-    imgs: pickAt(SPIN_360.shi400sc.frames, [6, 0, 12, 18]),
-    spin360: SPIN_360.shi400sc.frames,
-    spinSprite: SPIN_360.shi400sc.sprite,
-    wa: wa("SHI 400sc"),
-  },
-  {
-    brand: "SBM",
-    tag: "Custom",
-    name: "SBM 600V",
-    desc: "Custom de presença com motor V4 de 600cc, painel TFT com Bluetooth e freio duplo disco com ABS nas duas rodas. Conforto e estilo para rodar em grande estilo.",
-    specs: ["600cc V4", "ABS duplo canal", "Painel TFT Bluetooth"],
-    imgs: pickAt(SPIN_360.sbm600v.frames, [0, 5, 10, 15]),
-    spin360: SPIN_360.sbm600v.frames,
-    spinSprite: SPIN_360.sbm600v.sprite,
-    wa: wa("SBM 600V"),
-  },
-  {
-    brand: "SBM",
-    tag: "Sport",
-    name: "SBM 600R",
-    desc: "Esportiva de ponta com motor 4 cilindros e 88,4cv, freios ABS nas duas rodas e painel TFT com espelhamento de tela via aplicativo. O topo de linha da revenda.",
-    specs: ["600cc 4 cilindros", "88,4cv", "Painel TFT + app"],
-    badge: "Top de linha",
-    imgs: pickAt(SPIN_360.sbm600r.frames, [0, 4, 9, 14]),
-    spin360: SPIN_360.sbm600r.frames,
-    spinSprite: SPIN_360.sbm600r.sprite,
-    wa: wa("SBM 600R"),
-  },
-];
-
-// Quanto maior o divisor, mais arrasto é necessário por quadro — giro mais lento e
-// controlado (comparado ao valor original de 6, que virava a moto inteira num gesto rápido).
-const DRAG_PX_PER_FRAME = 36;
-
-// Carrega no máximo N imagens por vez, com uma pequena pausa entre elas. Disparar as
-// imagens de uma sequência 360° todas de uma vez faz o navegador enfileirar a maioria
-// como prioridade "Low" e, sob contenção de conexão, abortar essas requisições (visto em
-// produção como NS_BINDING_ABORTED) — indo uma de cada vez por "worker" evita essa
-// contenção. Com os sprites do card isso vira ruído (são 3-5 arquivos), mas ainda vale
-// para os ~19-44 quadros individuais que o lightbox carrega.
-function preloadFrames(urls: string[], concurrency = 2, delayMs = 60) {
-  let next = 0;
-  const loadNext = () => {
-    const url = urls[next++];
-    if (!url) return;
-    const img = new Image();
-    img.onload = () => setTimeout(loadNext, delayMs);
-    img.onerror = () => setTimeout(loadNext, delayMs);
-    img.src = url;
-  };
-  for (let i = 0; i < Math.min(concurrency, urls.length); i++) loadNext();
-}
-
-// Fundo escuro de estúdio usado atrás dos recortes com fundo transparente — mesmo
-// tratamento do card e do lightbox, para a moto parecer fotografada no mesmo ambiente.
-const STUDIO_BG =
-  "bg-[radial-gradient(ellipse_at_50%_30%,_rgba(255,255,255,0.08),_rgba(10,10,10,0.96)_70%)]";
-const THUMB_BG = "bg-neutral-900";
-
-function AngleIndicator({
-  angle,
-  position,
+function Destaques({
+  bikes,
+  onAmpliar,
 }: {
-  angle: number;
-  position: "top-left" | "bottom-left";
+  bikes: Bike[];
+  onAmpliar: (bike: Bike, cor: number) => void;
 }) {
-  const rad = (angle * Math.PI) / 180;
-  const x2 = 14 + 10 * Math.sin(rad);
-  const y2 = 14 - 10 * Math.cos(rad);
-  const positionClass = position === "top-left" ? "left-3 top-3" : "bottom-3 left-3";
+  const lista = ordenarDestaques(bikes).slice(0, 6);
+  if (lista.length === 0) return null;
   return (
-    <div
-      className={`pointer-events-none absolute ${positionClass} flex items-center gap-2 rounded-full bg-background/85 px-2.5 py-2 shadow backdrop-blur`}
-    >
-      <svg width="28" height="28" viewBox="0 0 28 28" aria-hidden>
-        <circle cx="14" cy="14" r="12" fill="none" className="stroke-border" strokeWidth="1.5" />
-        <line
-          x1="14"
-          y1="14"
-          x2={x2}
-          y2={y2}
-          className="stroke-primary"
-          strokeWidth="2"
-          strokeLinecap="round"
-        />
-        <circle cx="14" cy="14" r="1.5" className="fill-primary" />
-      </svg>
-      <span className="text-[11px] font-semibold tabular-nums text-ink">{Math.round(angle)}°</span>
-    </div>
-  );
-}
-
-// Aceita as duas camadas geradas pelo build:360 — `sprite` (card) ou `frames`
-// (lightbox). A diferença fica contida em duas coisas: qual URL precisa estar carregada
-// para poder exibir o quadro `i`, e como esse quadro é pintado. Todo o resto (arrasto,
-// buffer de carregamento, indicador de ângulo) é comum aos dois modos.
-function Spin360Viewer({
-  frames,
-  sprite,
-  alt,
-  onTap,
-  anglePosition = "bottom-left",
-}: {
-  frames?: string[];
-  sprite?: SpinSprite;
-  alt: string;
-  onTap?: () => void;
-  anglePosition?: "top-left" | "bottom-left";
-}) {
-  const frameCount = sprite ? sprite.count : (frames?.length ?? 0);
-  // No modo sprite, o que "carrega" um quadro é a sheet que o contém — por isso vários
-  // quadros compartilham a mesma URL e o giro dentro de uma sheet já carregada é instantâneo.
-  const urlAt = (i: number) =>
-    sprite ? sprite.sheets[Math.floor(i / sprite.perSheet)] : (frames?.[i] ?? "");
-  const sources = sprite ? sprite.sheets : (frames ?? []);
-
-  const [index, setIndex] = useState(0);
-  // Quadro efetivamente exibido no <img>. Só acompanha `index` depois que o quadro alvo
-  // termina de carregar — ver efeito abaixo. Isso é o que evita a tela quebrada/vazia no
-  // primeiro giro, antes do cache do navegador estar aquecido.
-  const [displayIndex, setDisplayIndex] = useState(0);
-  const [hint, setHint] = useState(true);
-  const drag = useRef<{ startX: number; startIndex: number; moved: boolean } | null>(null);
-  const urlRef = useRef(urlAt);
-  urlRef.current = urlAt;
-
-  // Em produção os quadros vêm da rede (não do disco local, como em dev), então sem
-  // pré-carregar cada arrasto dispara um fetch novo: a imagem trava até chegar e o
-  // índice (já avançado pelo pointermove) "salta" vários quadros de uma vez quando o
-  // navegador finalmente termina de baixar. Aquecendo o cache do navegador assim que o
-  // viewer monta evita esse efeito de giro brusco.
-  useEffect(() => {
-    // Sem cleanup de propósito: interromper o preload no meio (ex: img.src = "") é o que
-    // gerava os NS_BINDING_ABORTED em produção (o viewer remonta ao trocar de modo/abrir
-    // o lightbox, e cancelar o fetch em andamento só forçava uma nova tentativa depois).
-    // Deixar o download seguir em segundo plano é inofensivo — o navegador dedupe pedidos
-    // repetidos pra mesma URL e o resultado fica no cache HTTP de qualquer forma.
-    preloadFrames(sources);
-  }, [sources]);
-
-  // Só troca o quadro exibido depois que ele terminou de carregar de fato (cache hit
-  // resolve quase instantâneo; cache miss mantém o quadro anterior na tela em vez de
-  // piscar em branco). É esse buffer que fazia o giro "não funcionar" no primeiro arrasto
-  // em produção — sem ele, o <img src> apontava pra um quadro ainda em voo.
-  useEffect(() => {
-    let cancelled = false;
-    const img = new Image();
-    img.fetchPriority = "high";
-    img.onload = () => {
-      if (!cancelled) setDisplayIndex(index);
-    };
-    img.onerror = () => {
-      if (!cancelled) setDisplayIndex(index);
-    };
-    img.src = urlRef.current(index);
-    return () => {
-      cancelled = true;
-    };
-  }, [index, sources]);
-
-  const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    drag.current = { startX: e.clientX, startIndex: index, moved: false };
-  };
-
-  const onPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!drag.current) return;
-    const dx = e.clientX - drag.current.startX;
-    if (Math.abs(dx) > 4) drag.current.moved = true;
-    if (!drag.current.moved) return;
-    setHint(false);
-    const framesPerDrag = Math.round(dx / DRAG_PX_PER_FRAME);
-    let next = (drag.current.startIndex - framesPerDrag) % frameCount;
-    if (next < 0) next += frameCount;
-    setIndex(next);
-  };
-
-  const endDrag = () => {
-    if (drag.current && !drag.current.moved) onTap?.();
-    drag.current = null;
-  };
-
-  const angle = (displayIndex / frameCount) * 360;
-
-  return (
-    <div
-      className={`relative h-full w-full touch-pan-y select-none ${
-        onTap ? "cursor-zoom-in" : "cursor-grab active:cursor-grabbing"
-      }`}
-      onPointerDown={onPointerDown}
-      onPointerMove={onPointerMove}
-      onPointerUp={endDrag}
-      onPointerLeave={endDrag}
-      onPointerCancel={endDrag}
-    >
-      {sprite ? (
-        // O quadro é uma célula da sheet: `background-size` de cols*100% x rows*100%
-        // faz cada célula ocupar exatamente a caixa, e `background-position` em
-        // porcentagem escolhe qual delas. O wrapper flex + aspect-ratio reproduz o
-        // `object-contain` do <img> — sem ele a célula esticaria e distorceria a moto.
-        <div className="pointer-events-none flex h-full w-full items-center justify-center">
-          <div
-            role="img"
-            aria-label={alt}
-            className="max-h-full max-w-full"
-            style={{
-              width: "100%",
-              aspectRatio: `${sprite.frameW} / ${sprite.frameH}`,
-              backgroundImage: `url(${sprite.sheets[Math.floor(displayIndex / sprite.perSheet)]})`,
-              backgroundSize: `${sprite.cols * 100}% ${sprite.rows * 100}%`,
-              backgroundPosition: `${
-                sprite.cols > 1
-                  ? (((displayIndex % sprite.perSheet) % sprite.cols) / (sprite.cols - 1)) * 100
-                  : 0
-              }% ${
-                sprite.rows > 1
-                  ? (Math.floor((displayIndex % sprite.perSheet) / sprite.cols) /
-                      (sprite.rows - 1)) *
-                    100
-                  : 0
-              }%`,
-              backgroundRepeat: "no-repeat",
-            }}
-          />
-        </div>
-      ) : (
-        <img
-          src={frames?.[displayIndex]}
-          alt={alt}
-          draggable={false}
-          className="h-full w-full object-contain pointer-events-none"
-        />
-      )}
-      <AngleIndicator angle={angle} position={anglePosition} />
-      {hint && (
-        <div className="pointer-events-none absolute inset-0 flex items-end justify-center pb-4">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-background/85 px-3 py-1.5 text-[11px] font-semibold text-ink shadow backdrop-blur">
-            <span aria-hidden>↔</span> Arraste para girar
-          </span>
-        </div>
-      )}
-    </div>
-  );
-}
-
-// Lista de specs em pill — usada no sidebar do lightbox (BikeInfo) e no card do
-// catálogo (Lineup), com o mesmo pill mas espaçamento externo diferente.
-function BikeSpecs({ specs, className = "" }: { specs: string[]; className?: string }) {
-  return (
-    <ul className={`flex flex-wrap gap-1.5 ${className}`}>
-      {specs.map((s) => (
-        <li
-          key={s}
-          className="rounded-md bg-secondary px-2.5 py-1 text-xs font-medium text-secondary-foreground"
-        >
-          {s}
-        </li>
-      ))}
-    </ul>
-  );
-}
-
-// Bloco "valor / CTA" — idêntico no sidebar do lightbox e no card do catálogo,
-// só variando o espaçamento acima do botão. O slot do preço virou chamada para a
-// simulação: mesma hierarquia visual, sem número exposto.
-function BikePriceCTA({ bike, ctaClassName = "mt-5" }: { bike: Bike; ctaClassName?: string }) {
-  return (
-    <div>
-      <p className="text-[11px] uppercase tracking-widest text-muted-foreground">
-        Valor e condições
-      </p>
-      <p className="font-display text-3xl font-bold leading-none text-ink">Consulte aqui</p>
-      <p className="mt-1.5 text-sm font-semibold text-primary">Simulação sem compromisso</p>
-      <a
-        href={bike.wa}
-        className={`${ctaClassName} inline-flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-3 text-sm font-semibold text-primary-foreground transition hover:bg-primary-dark`}
-      >
-        Simular no WhatsApp
-        <span aria-hidden>→</span>
-      </a>
-    </div>
-  );
-}
-
-function BikeInfo({ bike }: { bike: Bike }) {
-  return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-md border border-primary/30 bg-primary/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-primary">
-            {bike.tag}
-          </span>
-          {bike.badge && (
-            <span className="inline-flex items-center gap-2 rounded-md bg-primary px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-primary-foreground">
-              {bike.badge}
-            </span>
-          )}
-        </div>
-        <h3 className="mt-4 font-display text-3xl font-bold text-ink">{bike.name}</h3>
-        <p className="mt-3 text-sm leading-relaxed text-muted-foreground">{bike.desc}</p>
-      </div>
-      <BikeSpecs specs={bike.specs} className="border-y border-border py-5" />
-      <BikePriceCTA bike={bike} />
-    </div>
-  );
-}
-
-function Lightbox({
-  bike,
-  mode,
-  index,
-  onClose,
-}: {
-  bike: Bike;
-  mode: "gallery" | "360";
-  index: number;
-  onClose: () => void;
-}) {
-  const ZOOM = 2.4;
-  const PAN_LIMIT = 220;
-  const [visible, setVisible] = useState(false);
-  const [lbMode, setLbMode] = useState(mode);
-  const [lbIndex, setLbIndex] = useState(index);
-  const [zoomed, setZoomed] = useState(false);
-  const [pan, setPan] = useState({ x: 0, y: 0 });
-  const has360 = !!bike.spin360?.length;
-  const dialogRef = useRef<HTMLDivElement>(null);
-  const previouslyFocused = useRef<HTMLElement | null>(null);
-  const imgDrag = useRef<{ x: number; y: number; moved: boolean } | null>(null);
-
-  const goTo = (delta: number) => {
-    setLbIndex((i) => (i + delta + bike.imgs.length) % bike.imgs.length);
-  };
-
-  // Troca de foto ou de modo sempre reseta o zoom/pan da imagem anterior.
-  useEffect(() => {
-    setZoomed(false);
-    setPan({ x: 0, y: 0 });
-  }, [lbIndex, lbMode]);
-
-  // Trava de scroll, foco inicial e devolução do foco ao elemento que abriu o lightbox.
-  useEffect(() => {
-    previouslyFocused.current = document.activeElement as HTMLElement | null;
-    const id = requestAnimationFrame(() => {
-      setVisible(true);
-      dialogRef.current?.focus();
-    });
-    document.body.style.overflow = "hidden";
-    return () => {
-      cancelAnimationFrame(id);
-      document.body.style.overflow = "";
-      previouslyFocused.current?.focus?.();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Esc fecha, ←/→ navegam entre fotos, Tab fica preso dentro do modal.
-  useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        onClose();
-        return;
-      }
-      if (lbMode === "gallery" && (e.key === "ArrowRight" || e.key === "ArrowLeft")) {
-        goTo(e.key === "ArrowRight" ? 1 : -1);
-        return;
-      }
-      if (e.key === "Tab") {
-        const container = dialogRef.current;
-        if (!container) return;
-        const focusables = Array.from(
-          container.querySelectorAll<HTMLElement>(
-            'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])',
-          ),
-        );
-        if (focusables.length === 0) return;
-        const first = focusables[0];
-        const last = focusables[focusables.length - 1];
-        if (e.shiftKey && document.activeElement === first) {
-          e.preventDefault();
-          last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
-          e.preventDefault();
-          first.focus();
-        }
-      }
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [lbMode, bike.imgs.length, onClose]);
-
-  const onImgPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
-    e.currentTarget.setPointerCapture(e.pointerId);
-    imgDrag.current = { x: e.clientX, y: e.clientY, moved: false };
-  };
-
-  const onImgPointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const drag = imgDrag.current;
-    if (!drag) return;
-    const dx = e.clientX - drag.x;
-    const dy = e.clientY - drag.y;
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) drag.moved = true;
-    if (zoomed && drag.moved) {
-      drag.x = e.clientX;
-      drag.y = e.clientY;
-      setPan((p) => ({
-        x: Math.max(-PAN_LIMIT, Math.min(PAN_LIMIT, p.x + dx / ZOOM)),
-        y: Math.max(-PAN_LIMIT, Math.min(PAN_LIMIT, p.y + dy / ZOOM)),
-      }));
-    }
-  };
-
-  const onImgPointerUp = () => {
-    const drag = imgDrag.current;
-    imgDrag.current = null;
-    if (drag && !drag.moved) {
-      setZoomed((z) => !z);
-      setPan({ x: 0, y: 0 });
-    }
-  };
-
-  return (
-    <div
-      className={`fixed inset-0 z-[60] bg-black/70 backdrop-blur-sm transition-opacity duration-300 lg:flex lg:items-center lg:justify-center lg:p-6 ${
-        visible ? "opacity-100" : "opacity-0"
-      }`}
-      onClick={onClose}
-    >
-      <div
-        ref={dialogRef}
-        onClick={(e) => e.stopPropagation()}
-        role="dialog"
-        aria-modal="true"
-        aria-label={`${bike.name} — fotos e detalhes`}
-        tabIndex={-1}
-        className={`grid h-full w-full grid-rows-[auto_1fr] overflow-hidden bg-card outline-none transition-all duration-300 lg:max-h-[88vh] lg:max-w-6xl lg:rounded-2xl lg:shadow-2xl lg:grid-cols-[1fr_380px] lg:grid-rows-1 ${
-          visible ? "scale-100 opacity-100" : "scale-95 opacity-0"
-        }`}
-      >
-        <div className={`relative flex h-full flex-col overflow-hidden p-4 sm:p-6 ${STUDIO_BG}`}>
-          <div className="flex items-center justify-between gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="inline-flex items-center gap-2 rounded-full border border-white/25 bg-black/40 px-4 py-2 text-sm font-semibold text-white backdrop-blur transition hover:bg-white/10"
-            >
-              <span aria-hidden>←</span> Voltar às motos
-            </button>
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Fechar"
-              className="grid h-10 w-10 shrink-0 place-items-center rounded-full border border-white/25 bg-black/40 text-white backdrop-blur transition hover:bg-white/10"
-            >
-              ✕
-            </button>
-          </div>
-
-          <div className="relative py-2 lg:min-h-0 lg:flex-1">
-            <div className="relative mx-auto aspect-[4/3] w-full lg:aspect-auto lg:h-full">
-              {lbMode === "360" && bike.spin360 ? (
-                <Spin360Viewer frames={bike.spin360} alt={bike.name} anglePosition="top-left" />
-              ) : (
-                <div
-                  onPointerDown={onImgPointerDown}
-                  onPointerMove={onImgPointerMove}
-                  onPointerUp={onImgPointerUp}
-                  onPointerLeave={onImgPointerUp}
-                  onPointerCancel={onImgPointerUp}
-                  className={`h-full w-full touch-none select-none overflow-hidden ${
-                    zoomed ? "cursor-grab active:cursor-grabbing" : "cursor-zoom-in"
-                  }`}
-                >
-                  <img
-                    src={bike.imgs[lbIndex]}
-                    alt={`${bike.name} — foto ${lbIndex + 1}`}
-                    draggable={false}
-                    className={`h-full w-full object-contain ${zoomed ? "" : "transition-transform duration-300"}`}
-                    style={{
-                      transform: zoomed
-                        ? `scale(${ZOOM}) translate(${pan.x}px, ${pan.y}px)`
-                        : "scale(1)",
-                    }}
-                  />
-                </div>
-              )}
-              {lbMode === "gallery" && bike.imgs.length > 1 && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => goTo(-1)}
-                    aria-label="Foto anterior"
-                    className="absolute left-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/30 bg-black/30 text-lg text-white backdrop-blur transition hover:bg-black/60"
-                  >
-                    ‹
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => goTo(1)}
-                    aria-label="Próxima foto"
-                    className="absolute right-2 top-1/2 grid h-10 w-10 -translate-y-1/2 place-items-center rounded-full border border-white/30 bg-black/30 text-lg text-white backdrop-blur transition hover:bg-black/60"
-                  >
-                    ›
-                  </button>
-                </>
-              )}
-              {has360 && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setZoomed(false);
-                    setLbMode(lbMode === "360" ? "gallery" : "360");
-                  }}
-                  className={`absolute bottom-2 left-2 flex h-14 w-14 flex-col items-center justify-center gap-0.5 rounded-full border-2 backdrop-blur transition sm:h-20 sm:w-20 ${
-                    lbMode === "360"
-                      ? "border-white/30 bg-black/50 text-white hover:bg-black/70"
-                      : "border-primary/70 bg-black/50 text-primary hover:bg-black/70"
-                  }`}
-                >
-                  {lbMode === "360" ? (
-                    <>
-                      <span aria-hidden className="text-base leading-none sm:text-xl">
-                        ✕
-                      </span>
-                      <span className="text-[8px] font-semibold sm:text-[10px]">Ver fotos</span>
-                    </>
-                  ) : (
-                    <>
-                      <span aria-hidden className="text-base leading-none sm:text-xl">
-                        ⟳
-                      </span>
-                      <span className="text-[9px] font-bold leading-none sm:text-[11px]">360°</span>
-                      <span className="text-[7px] font-medium sm:text-[9px]">Ver em 360</span>
-                    </>
-                  )}
-                </button>
-              )}
-            </div>
-          </div>
-
-          {lbMode === "gallery" && (
-            <div className="flex shrink-0 flex-col items-center gap-3 pt-2">
-              {bike.imgs.length > 1 && (
-                <div className="flex justify-center gap-1.5">
-                  {bike.imgs.map((im, i) => (
-                    <button
-                      key={i}
-                      type="button"
-                      onClick={() => {
-                        setLbIndex(i);
-                        setZoomed(false);
-                      }}
-                      aria-label={`Ver foto ${i + 1}`}
-                      className={`h-1 rounded-full transition ${
-                        lbIndex === i ? "w-6 bg-primary" : "w-3 bg-white/25 hover:bg-white/40"
-                      }`}
-                    />
-                  ))}
-                </div>
-              )}
-              <div className="flex w-full justify-center gap-2 overflow-x-auto">
-                {bike.imgs.map((im, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => {
-                      setLbIndex(i);
-                      setZoomed(false);
-                    }}
-                    aria-label={`Ver foto ${i + 1}`}
-                    aria-current={lbIndex === i}
-                    className={`aspect-[4/3] h-16 shrink-0 overflow-hidden rounded-lg border transition sm:h-20 ${THUMB_BG} ${
-                      lbIndex === i
-                        ? "border-primary ring-1 ring-primary/50"
-                        : "border-white/15 opacity-60 hover:opacity-100"
-                    }`}
-                  >
-                    <img src={im} alt="" className="h-full w-full object-contain p-1" />
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="max-h-full overflow-y-auto border-t border-border p-6 lg:self-center lg:border-l lg:border-t-0 lg:p-8">
-          <BikeInfo bike={bike} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function BikeGallery({
-  bike,
-  onExpand,
-}: {
-  bike: Bike;
-  onExpand: (mode: "gallery" | "360", index: number) => void;
-}) {
-  const [active, setActive] = useState(0);
-  const [mode, setMode] = useState<"gallery" | "360">("gallery");
-  const has360 = !!bike.spin360?.length;
-
-  return (
-    <div>
-      <div className={`relative aspect-[4/3] overflow-hidden ${STUDIO_BG}`}>
-        {mode === "360" && bike.spinSprite ? (
-          // Card usa os sprites: 3-5 requisições em vez de 19-44, e quadros de 640px
-          // para uma caixa de ~390-435 CSS px. O lightbox é quem carrega a alta.
-          <Spin360Viewer
-            sprite={bike.spinSprite}
-            alt={bike.name}
-            onTap={() => onExpand("360", 0)}
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => onExpand("gallery", active)}
-            aria-label={`Ampliar foto da ${bike.name}`}
-            className="block h-full w-full cursor-zoom-in"
-          >
-            <img
-              src={bike.imgs[active]}
-              alt={`${bike.name} — foto ${active + 1}`}
-              width={1200}
-              height={900}
-              loading="lazy"
-              // Recortes do giro 360° têm muita margem transparente, por isso o zoom extra;
-              // as fotos do catálogo já vêm enquadradas e seriam cortadas.
-              className={`h-full w-full object-contain transition duration-500 ${
-                has360 ? "scale-125 p-4 group-hover:scale-[1.32]" : "group-hover:scale-105"
-              }`}
-            />
-          </button>
-        )}
-        <span className="absolute left-3 top-3 rounded-md border border-primary/30 bg-background/75 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-primary backdrop-blur">
-          {bike.tag}
-        </span>
-        {bike.badge && (
-          <span className="absolute right-3 top-3 rounded-md bg-primary px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-primary-foreground">
-            {bike.badge}
-          </span>
-        )}
-        {has360 && (
-          <button
-            type="button"
-            onClick={() => setMode(mode === "360" ? "gallery" : "360")}
-            className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 rounded-full bg-background/85 px-3 py-1.5 text-[11px] font-semibold text-ink shadow backdrop-blur transition hover:bg-background"
-          >
-            {mode === "360" ? (
+    <section id="destaques" className="scroll-mt-16 border-b border-border">
+      <div className="mx-auto max-w-[1400px] px-5 py-20 lg:px-10 lg:py-24">
+        <header className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+          <SectionHeading
+            kicker="Destaques da loja"
+            title={
               <>
-                <span aria-hidden>✕</span> Fotos
+                As TOP {lista.length} mais vendidas
+                <br className="hidden sm:block" /> da VR.
               </>
-            ) : (
-              <>
-                <span aria-hidden>⟳</span> 360°
-              </>
-            )}
-          </button>
-        )}
-      </div>
-      {bike.imgs.length > 1 && (
-        <div
-          className="grid grid-cols-4 gap-1.5 border-b border-border p-2.5"
-          onMouseLeave={() => setActive(0)}
-        >
-          {bike.imgs.map((im, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => {
-                setActive(i);
-                setMode("gallery");
-                onExpand("gallery", i);
-              }}
-              onMouseEnter={() => setActive(i)}
-              aria-label={`Ver foto ${i + 1} da ${bike.name}`}
-              aria-current={mode === "gallery" && active === i}
-              className={`relative aspect-[4/3] overflow-hidden rounded-md border transition ${THUMB_BG} ${
-                mode === "gallery" && active === i
-                  ? "border-primary ring-1 ring-primary/40"
-                  : "border-border opacity-60 hover:opacity-100"
-              }`}
-            >
-              <img
-                src={im}
-                alt=""
-                width={300}
-                height={225}
-                loading="lazy"
-                className="h-full w-full object-contain p-1"
-              />
-            </button>
+            }
+            className="max-w-2xl"
+          />
+          <p className="max-w-sm text-muted-foreground">
+            Os modelos que mais se destacam no momento. Escolha a cor e peça as condições — a
+            resposta vem no WhatsApp.
+          </p>
+        </header>
+        {/* No celular, uma fileira que desliza para o lado: seis cards empilhados
+            empurrariam o catálogo para muito longe. */}
+        <div className="-mx-5 mt-10 flex snap-x snap-mandatory gap-4 overflow-x-auto px-5 pb-2 [scrollbar-width:none] sm:mx-0 sm:grid sm:grid-cols-2 sm:gap-6 sm:overflow-visible sm:px-0 sm:pb-0 lg:grid-cols-3">
+          {lista.map((b) => (
+            <div key={b.id} className="flex w-[84%] shrink-0 snap-center sm:w-auto">
+              <BikeCard bike={b} maisVendida onAmpliar={onAmpliar} />
+            </div>
           ))}
         </div>
-      )}
-    </div>
-  );
-}
-
-// Ordem alfabética: nenhuma marca ganha destaque sobre as outras.
-// `size` é ajuste ótico — Bull e Zontes têm um símbolo alto junto do nome, então na
-// altura padrão o nome sai menor que o das vizinhas.
-const SHOWROOM_BRANDS: { name: string; logo: string; size?: string }[] = [
-  { name: "Avelloz", logo: marcaAvelloz },
-  { name: "Bull", logo: marcaBull, size: "h-6 sm:h-7" },
-  { name: "Haojue", logo: marcaHaojue },
-  { name: "Honda", logo: marcaHonda },
-  { name: "SBM", logo: marcaSbm },
-  { name: "Shineray", logo: marcaShineray },
-  { name: "Suzuki", logo: marcaSuzuki },
-  { name: "Yamaha", logo: marcaYamaha },
-  { name: "Zontes", logo: marcaZontes, size: "h-7 sm:h-8" },
-];
-
-// Faixa de marcas logo abaixo do cabeçalho do catálogo: o catálogo mostra a linha em
-// destaque, e esta faixa responde a pergunta que todo visitante de multimarcas faz antes
-// de rolar ("vocês têm Honda? Yamaha?").
-function ShowroomBrands() {
-  return (
-    <div className="mt-10 rounded-xl border border-border bg-surface/60 px-5 py-5 sm:px-7 sm:py-6">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-muted-foreground">
-        Marcas que você encontra no showroom
-      </p>
-      <ul className="mt-5 flex flex-wrap items-center gap-x-8 gap-y-5 sm:gap-x-11">
-        {SHOWROOM_BRANDS.map((m) => (
-          <li key={m.name}>
-            <img
-              src={m.logo}
-              alt={m.name}
-              loading="lazy"
-              className={`w-auto max-w-full object-contain opacity-80 transition hover:opacity-100 ${
-                m.size ?? "h-5 sm:h-6"
-              }`}
-            />
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
-function Lineup() {
-  const categories = useMemo(
-    () => [...Array.from(new Set(BIKES.map((b) => b.brand))), "Todas"],
-    [],
-  );
-  const [filter, setFilter] = useState("Todas");
-  const visible = filter === "Todas" ? BIKES : BIKES.filter((b) => b.brand === filter);
-  const [lightbox, setLightbox] = useState<{
-    bike: Bike;
-    mode: "gallery" | "360";
-    index: number;
-  } | null>(null);
-
-  return (
-    <section id="linha" className="mx-auto max-w-[1700px] px-5 py-20 lg:px-10 lg:py-24">
-      <header className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
-        <div className="max-w-xl">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-primary">
-            Catálogo — linha 2026
-          </p>
-          <h2 className="mt-4 font-display text-4xl font-bold leading-[1.05] text-ink sm:text-5xl">
-            Escolha a sua próxima máquina.
-          </h2>
-        </div>
-        <p className="max-w-sm text-muted-foreground">
-          Da scooter urbana à big trail — todas com procedência, garantia de 12 meses e primeira
-          revisão inclusa.
-        </p>
-      </header>
-
-      <ShowroomBrands />
-
-      <div className="mt-10 flex flex-wrap gap-2" role="group" aria-label="Filtrar por marca">
-        {categories.map((c) => (
-          <button
-            key={c}
-            type="button"
-            onClick={() => setFilter(c)}
-            aria-pressed={filter === c}
-            className={`rounded-full border px-4 py-2 text-sm font-semibold transition ${
-              filter === c
-                ? "border-primary bg-primary text-primary-foreground"
-                : "border-border bg-surface text-muted-foreground hover:border-primary/40 hover:text-primary"
-            }`}
-          >
-            {c}
-          </button>
-        ))}
-      </div>
-
-      <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {visible.map((b) => (
-          <article
-            key={b.name}
-            className="group flex flex-col overflow-hidden rounded-xl border border-border bg-card shadow-card transition duration-300 hover:-translate-y-1 hover:shadow-card-hover"
-          >
-            <BikeGallery
-              bike={b}
-              onExpand={(mode, index) => setLightbox({ bike: b, mode, index })}
-            />
-            <div className="flex flex-1 flex-col gap-4 p-5">
-              <div>
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
-                  {b.brand}
-                </p>
-                <h3 className="font-display text-xl font-bold text-ink">{b.name}</h3>
-                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">{b.desc}</p>
-              </div>
-              <BikeSpecs specs={b.specs} />
-              <div className="mt-auto border-t border-border pt-4">
-                <BikePriceCTA bike={b} ctaClassName="mt-4" />
-              </div>
-            </div>
-          </article>
-        ))}
-      </div>
-
-      <div className="mt-10 flex flex-col items-center gap-3">
-        <a
-          href={WHATSAPP}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition hover:text-primary"
-        >
-          Ver todos os modelos disponíveis no showroom
-          <span aria-hidden>→</span>
-        </a>
-        <p className="text-center text-xs text-muted-foreground/70">
-          Valores e condições sob consulta, sujeitos a análise de crédito e a alteração sem aviso
-          prévio. Fale com um consultor VR para a simulação atualizada.
+        <p className="mt-3 text-center text-xs text-muted-foreground sm:hidden">
+          Deslize para ver as {lista.length} →
         </p>
       </div>
-
-      {lightbox && (
-        <Lightbox
-          bike={lightbox.bike}
-          mode={lightbox.mode}
-          index={lightbox.index}
-          onClose={() => setLightbox(null)}
-        />
-      )}
     </section>
   );
 }
 
-// Cada seção "eyebrow + título" da página reusa o mesmo par de estilos —
-// centralizado aqui pra não divergir seção a seção.
+function AbaMarca({
+  id,
+  ativa,
+  aoEscolher,
+  rotulo,
+  children,
+}: {
+  id: string;
+  ativa: string;
+  aoEscolher: (id: string) => void;
+  rotulo: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={() => aoEscolher(id)}
+      aria-pressed={ativa === id}
+      aria-label={rotulo}
+      className={`inline-flex h-12 shrink-0 items-center gap-2.5 rounded-full border px-5 text-sm font-semibold transition ${
+        ativa === id
+          ? "border-primary bg-primary/10 text-ink ring-1 ring-primary/40"
+          : "border-border bg-surface text-muted-foreground hover:border-primary/40 hover:text-ink"
+      }`}
+    >
+      {children}
+    </button>
+  );
+}
+
+function Lineup({
+  bikes,
+  onAmpliar,
+}: {
+  bikes: Bike[];
+  onAmpliar: (bike: Bike, cor: number) => void;
+}) {
+  const marcas = useMemo(() => marcasPresentes(bikes), [bikes]);
+  // Abre na primeira marca (Shineray), não em "Todas": com todas as marcas abertas a
+  // lista fica comprida demais. "Todas" continua disponível, como última aba.
+  const [escolhida, setFiltro] = useState<string>(() => marcas[0]?.id ?? "todas");
+  const filtro =
+    escolhida === "todas" || marcas.some((m) => m.id === escolhida)
+      ? escolhida
+      : (marcas[0]?.id ?? "todas");
+  const topoRef = useRef<HTMLDivElement>(null);
+
+  const grupos = marcas
+    .filter((m) => filtro === "todas" || m.id === filtro)
+    .map((m) => ({ marca: m, bikes: bikes.filter((b) => b.marca.id === m.id) }));
+
+  const escolher = (id: string) => {
+    setFiltro(id);
+    // Quem clica na aba com a lista já rolada quer ver o começo da marca, não o meio
+    // da marca anterior.
+    const topo = topoRef.current;
+    if (topo && topo.getBoundingClientRect().top < 0) {
+      topo.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  return (
+    <section id="linha" className="scroll-mt-16">
+      <div className="mx-auto max-w-[1700px] px-5 pt-20 lg:px-10 lg:pt-24">
+        <header className="flex flex-col justify-between gap-6 lg:flex-row lg:items-end">
+          <SectionHeading
+            kicker="Catálogo — linha 2026"
+            title="Escolha pela marca."
+            className="max-w-xl"
+          />
+          <p className="max-w-sm text-muted-foreground">
+            Toque numa marca para ver só os modelos dela. Em cada moto, escolha a cor e veja as
+            condições.
+          </p>
+        </header>
+      </div>
+
+      <div ref={topoRef} className="scroll-mt-16" />
+      {/* Abas presas logo abaixo do cabeçalho: dá para trocar de marca sem voltar ao topo.
+          No celular a fileira rola de lado; no computador quebra linha, porque com oito
+          marcas a última aba ficaria escondida atrás de uma rolagem que o mouse não vê. */}
+      <div className="sticky top-16 z-30 mt-10 border-y border-border bg-background/90 backdrop-blur-md">
+        <div
+          role="group"
+          aria-label="Filtrar por marca"
+          className="mx-auto flex max-w-[1700px] gap-2 overflow-x-auto px-5 py-3 [scrollbar-width:none] lg:flex-wrap lg:px-10"
+        >
+          {marcas.map((m) => {
+            const total = bikes.filter((b) => b.marca.id === m.id).length;
+            return (
+              <AbaMarca
+                key={m.id}
+                ativa={filtro}
+                aoEscolher={escolher}
+                id={m.id}
+                rotulo={`${m.nome} (${total} modelos)`}
+              >
+                {m.logo ? (
+                  <img
+                    src={m.logo}
+                    alt=""
+                    className={`w-auto object-contain ${m.altura ?? "h-4 sm:h-5"}`}
+                  />
+                ) : (
+                  m.nome
+                )}
+                <span className="text-xs font-medium text-muted-foreground">{total}</span>
+              </AbaMarca>
+            );
+          })}
+          <AbaMarca
+            ativa={filtro}
+            aoEscolher={escolher}
+            id="todas"
+            rotulo={`Todas as marcas (${bikes.length} modelos)`}
+          >
+            Todas
+            <span className="text-xs font-medium text-muted-foreground">{bikes.length}</span>
+          </AbaMarca>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-[1700px] px-5 pb-20 lg:px-10 lg:pb-24">
+        {grupos.map(({ marca, bikes: lista }) => (
+          <div key={marca.id} className="pt-10">
+            <div className="flex items-center gap-4 border-b border-border pb-4">
+              <SeloMarca marca={marca} className="h-6 sm:h-7" />
+              <span className="text-sm text-muted-foreground">
+                {lista.length} modelo{lista.length === 1 ? "" : "s"}
+              </span>
+            </div>
+            <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+              {lista.map((b) => (
+                <BikeCard key={b.id} bike={b} onAmpliar={onAmpliar} />
+              ))}
+            </div>
+          </div>
+        ))}
+
+        <div className="mt-12 flex flex-col items-center gap-3">
+          <a
+            href={WHATSAPP}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 text-sm font-semibold text-muted-foreground transition hover:text-primary"
+          >
+            Não achou o modelo? Pergunte no WhatsApp
+            <span aria-hidden>→</span>
+          </a>
+          <p className="max-w-2xl text-center text-xs text-muted-foreground/70">
+            Valores e condições sob consulta, sujeitos a análise de crédito e a alteração sem aviso
+            prévio. Imagens ilustrativas, fornecidas pelos fabricantes; cores e itens podem variar
+            conforme a versão.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function SectionHeading({
   kicker,
   title,
@@ -1890,21 +950,5 @@ function Footer() {
         </p>
       </div>
     </footer>
-  );
-}
-
-function FloatingWhatsApp() {
-  return (
-    <a
-      href={WHATSAPP}
-      aria-label="Falar no WhatsApp"
-      className="fixed bottom-5 right-5 z-50 inline-flex items-center gap-2 rounded-full bg-[#25D366] px-5 py-3.5 text-sm font-semibold text-white shadow-[0_10px_30px_-8px_rgba(37,211,102,0.7)] transition hover:brightness-105"
-    >
-      <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5" aria-hidden>
-        <path d="M17.47 14.38c-.3-.15-1.75-.86-2.02-.96-.27-.1-.47-.15-.67.15-.2.3-.77.96-.94 1.16-.17.2-.35.22-.65.07-.3-.15-1.25-.46-2.38-1.47-.88-.78-1.47-1.75-1.64-2.05-.17-.3-.02-.46.13-.61.13-.13.3-.35.45-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.08-.15-.67-1.6-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.01-1.04 2.47s1.06 2.86 1.21 3.06c.15.2 2.1 3.2 5.08 4.49.71.3 1.26.49 1.69.63.71.22 1.36.19 1.87.12.57-.09 1.75-.71 2-1.4.25-.69.25-1.28.17-1.4-.07-.13-.27-.2-.57-.35z" />
-        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.32 4.95L2 22l5.28-1.38a9.9 9.9 0 0 0 4.76 1.21h.01c5.46 0 9.9-4.45 9.9-9.91C21.95 6.45 17.5 2 12.04 2zm0 18.14h-.01a8.2 8.2 0 0 1-4.19-1.15l-.3-.18-3.12.82.83-3.05-.2-.31a8.19 8.19 0 0 1-1.26-4.36c0-4.54 3.7-8.23 8.25-8.23a8.23 8.23 0 0 1 8.24 8.24c0 4.54-3.7 8.22-8.24 8.22z" />
-      </svg>
-      <span className="hidden sm:inline">WhatsApp</span>
-    </a>
   );
 }
