@@ -1325,7 +1325,7 @@ function ShowroomBrands() {
 
 function Lineup() {
   const categories = useMemo(
-    () => ["Todas", ...Array.from(new Set(BIKES.map((b) => b.brand)))],
+    () => [...Array.from(new Set(BIKES.map((b) => b.brand))), "Todas"],
     [],
   );
   const [filter, setFilter] = useState("Todas");
